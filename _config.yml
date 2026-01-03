@@ -1,0 +1,55 @@
+# Jekyll Configuration for GitHub Pages
+
+title: FIAP Tech Challenge - Phase 1
+description: Sistema de Gerenciamento de Usuários com Spring Boot 3.2.1
+author: Development Team
+email: dev@fiaptech.com
+
+# Build settings
+markdown: kramdown
+theme: jekyll-theme-slate
+
+# Exclude from build
+exclude:
+  - target/
+  - src/
+  - pom.xml
+  - Dockerfile
+  - docker-compose.yml
+  - .env
+  - .git
+  - .gitignore
+  - node_modules/
+  - '*.jar'
+
+# Plugins
+plugins:
+  - jekyll-seo-tag
+  - jekyll-feed
+
+# SEO Settings
+twitter:
+  username: fiaptech
+github:
+  repository_url: https://github.com/yourusername/fiap-tech-challenge-1
+
+# Mermaid diagram support
+mermaid:
+  mode: 'init'
+  config:
+    startOnLoad: true
+    theme: 'default'
+    securityLevel: 'loose'
+
+# Navigation
+navigation:
+  - title: Home
+    url: /
+  - title: Quick Start
+    url: QUICK_START.html
+  - title: Architecture
+    url: ARCHITECTURE.html
+  - title: API Docs
+    url: /swagger-ui.html
+  - title: Diagrams
+    url: DIAGRAMS.html

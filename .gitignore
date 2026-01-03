@@ -28,6 +28,63 @@ replay_pid*
 target/
 .m2/
 maven-status/
+
+# GitHub Pages / Jekyll
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
+
+# Environment
+.env
+.env.local
+.env.*.local
+*.properties.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings/
+
+# OS
+Thumbs.db
+
+# Dependencies
+node_modules/
+.bundle/
+vendor/
+Gemfile.lock
+
+# Git
+.git/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker
+docker-compose.override.yml
+
+# Temporary
+*.tmp
+*.temp
+.temp/
+tmp/
+
+# Backup
+*.bak
+*.backup
+*.orig
 maven-failure.txt
 
 # IDE - IntelliJ
