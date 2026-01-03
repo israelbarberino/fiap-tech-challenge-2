@@ -1,0 +1,578 @@
+openapi: 3.0.3
+info:
+  title: FIAP Tech Challenge - User Management API
+  description: |
+    API REST para gerenciamento de usuários (Phase 1).
+    Inclui CRUD de usuários, validação de credenciais e padronização de erros via RFC 7807 (Problem Details).
+  version: "1.0.0"
+servers:
+  - url: http://localhost:8080
+    description: Local (Docker)
+  - url: http://localhost:8081
+    description: Local (execução sem Docker)
+
+tags:
+  - name: Autenticação
+    description: Operações relacionadas à validação de credenciais
+  - name: Usuários
+    description: CRUD de usuários
+  - name: Observabilidade
+    description: Health check e informações operacionais
+
+paths:
+  /api/v1/auth/validate:
+    post:
+      tags: [Autenticação]
+      summary: Validar credenciais (login/senha)
+      description: Valida credenciais de um usuário existente.
+      operationId: validateCredentials
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginValidateRequest"
+            examples:
+              sucesso:
+                summary: Credenciais válidas
+                value:
+                  login: "joao.silva"
+                  password: "Senha@123"
+              loginInvalido:
+                summary: Login inexistente
+                value:
+                  login: "usuario.inexistente"
+                  password: "SenhaQualquer"
+              senhaIncorreta:
+                summary: Senha incorreta
+                value:
+                  login: "joao.silva"
+                  password: "SenhaErrada"
+      responses:
+        "200":
+          description: Credenciais válidas
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginValidateResponse"
+              examples:
+                ok:
+                  value:
+                    valid: true
+        "401":
+          description: Credenciais inválidas
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+              examples:
+                invalidLogin:
+                  value:
+                    type: "https://api.fiap.com/errors/401"
+                    title: "Credenciais inválidas"
+                    status: 401
+                    detail: "Login ou senha inválidos"
+                    instance: "/api/v1/auth/validate"
+                    traceId: "550e8400-e29b-41d4-a716-446655440000"
+                    timestamp: "2026-01-03T10:30:00.000Z"
+                    errorCode: "INVALID_LOGIN"
+                    severity: "error"
+        "400":
+          description: Requisição inválida / erro de validação de payload
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+
+  /api/v1/users:
+    post:
+      tags: [Usuários]
+      summary: Criar usuário
+      description: Cria um novo usuário com endereço (objeto embutido).
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCreateRequest"
+            examples:
+              criar:
+                value:
+                  name: "João Silva"
+                  email: "joao.silva@example.com"
+                  login: "joao.silva"
+                  password: "Senha@123"
+                  role: "CUSTOMER"
+                  address:
+                    street: "Rua das Flores"
+                    number: "123"
+                    complement: "Apto 456"
+                    city: "São Paulo"
+                    state: "SP"
+                    zipCode: "01234-567"
+      responses:
+        "201":
+          description: Usuário criado
+          headers:
+            Location:
+              description: URI do recurso criado
+              schema:
+                type: string
+              example: "/api/v1/users/1"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+              examples:
+                created:
+                  value:
+                    id: 1
+                    name: "João Silva"
+                    email: "joao.silva@example.com"
+                    login: "joao.silva"
+                    role: "CUSTOMER"
+                    address:
+                      street: "Rua das Flores"
+                      number: "123"
+                      complement: "Apto 456"
+                      city: "São Paulo"
+                      state: "SP"
+                      zipCode: "01234-567"
+                    createdAt: "2026-01-03T10:30:00.000Z"
+                    lastModifiedAt: "2026-01-03T10:30:00.000Z"
+        "400":
+          description: Erro de validação (payload inválido)
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+        "409":
+          description: Conflito (email ou login duplicado)
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+              examples:
+                duplicateEmail:
+                  value:
+                    type: "https://api.fiap.com/errors/409"
+                    title: "Email Duplicado"
+                    status: 409
+                    detail: "Email 'joao.silva@example.com' já está registrado"
+                    instance: "/api/v1/users"
+                    traceId: "550e8400-e29b-41d4-a716-446655440000"
+                    timestamp: "2026-01-03T10:30:00.000Z"
+                    errorCode: "DUPLICATE_EMAIL"
+                    severity: "error"
+
+    get:
+      tags: [Usuários]
+      summary: Buscar usuários por nome
+      description: Retorna usuários cujo nome contenha o termo informado (case-insensitive).
+      operationId: getUsersByName
+      parameters:
+        - name: name
+          in: query
+          required: true
+          description: Termo de busca para o nome do usuário
+          schema:
+            type: string
+          example: "João"
+      responses:
+        "200":
+          description: Lista de usuários
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserResponse"
+        "400":
+          description: Parâmetro inválido
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+
+  /api/v1/users/{id}:
+    get:
+      tags: [Usuários]
+      summary: Obter usuário por ID
+      operationId: getUserById
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        "200":
+          description: Usuário encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "404":
+          description: Usuário não encontrado
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+              examples:
+                notFound:
+                  value:
+                    type: "https://api.fiap.com/errors/404"
+                    title: "Usuário não encontrado"
+                    status: 404
+                    detail: "Usuário com id=999 não foi encontrado"
+                    instance: "/api/v1/users/999"
+                    traceId: "550e8400-e29b-41d4-a716-446655440000"
+                    timestamp: "2026-01-03T10:30:00.000Z"
+                    errorCode: "USER_NOT_FOUND"
+                    severity: "error"
+        "400":
+          description: ID inválido
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+
+    put:
+      tags: [Usuários]
+      summary: Atualizar usuário
+      description: Atualiza dados do usuário (sem alterar senha).
+      operationId: updateUser
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdateRequest"
+            examples:
+              atualizar:
+                value:
+                  name: "João Silva Santos"
+                  email: "joao.silva.updated@example.com"
+                  role: "RESTAURANT_OWNER"
+                  address:
+                    street: "Avenida Paulista"
+                    number: "500"
+                    complement: "Apto 1001"
+                    city: "São Paulo"
+                    state: "SP"
+                    zipCode: "01311-100"
+      responses:
+        "200":
+          description: Usuário atualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "400":
+          description: Erro de validação
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+        "404":
+          description: Usuário não encontrado
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+        "409":
+          description: Conflito (email duplicado)
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+
+    delete:
+      tags: [Usuários]
+      summary: Remover usuário
+      operationId: deleteUser
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        "204":
+          description: Usuário removido
+        "404":
+          description: Usuário não encontrado
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+        "400":
+          description: ID inválido
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+
+  /api/v1/users/{id}/password:
+    patch:
+      tags: [Usuários]
+      summary: Alterar senha do usuário
+      description: |
+        Altera a senha do usuário. Exige senha atual e confirmação.
+        Justificativa do PATCH: alteração parcial do recurso.
+      operationId: changePassword
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangePasswordRequest"
+            examples:
+              alterar:
+                value:
+                  currentPassword: "Senha@123"
+                  newPassword: "NovaSenh@456"
+                  confirmPassword: "NovaSenh@456"
+      responses:
+        "204":
+          description: Senha alterada com sucesso (sem corpo)
+        "400":
+          description: Erro de validação
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+        "401":
+          description: Senha atual incorreta / credenciais inválidas
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+        "404":
+          description: Usuário não encontrado
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+
+  /actuator/health:
+    get:
+      tags: [Observabilidade]
+      summary: Health check
+      operationId: health
+      responses:
+        "200":
+          description: Serviço saudável
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                up:
+                  value:
+                    status: "UP"
+
+components:
+  parameters:
+    UserId:
+      name: id
+      in: path
+      required: true
+      description: Identificador do usuário
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+      example: 1
+
+  schemas:
+    UserRole:
+      type: string
+      description: Papel do usuário no sistema
+      enum: [RESTAURANT_OWNER, CUSTOMER]
+
+    AddressDTO:
+      type: object
+      additionalProperties: false
+      properties:
+        street:
+          type: string
+          maxLength: 255
+          example: "Rua das Flores"
+        number:
+          type: string
+          maxLength: 10
+          example: "123"
+        complement:
+          type: string
+          nullable: true
+          maxLength: 255
+          example: "Apto 456"
+        city:
+          type: string
+          maxLength: 100
+          example: "São Paulo"
+        state:
+          type: string
+          maxLength: 2
+          example: "SP"
+        zipCode:
+          type: string
+          maxLength: 10
+          example: "01234-567"
+      required: [street, number, city, state, zipCode]
+
+    UserCreateRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          maxLength: 150
+          example: "João Silva"
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          example: "joao.silva@example.com"
+        login:
+          type: string
+          maxLength: 100
+          example: "joao.silva"
+        password:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 255
+          example: "Senha@123"
+        role:
+          $ref: "#/components/schemas/UserRole"
+        address:
+          $ref: "#/components/schemas/AddressDTO"
+      required: [name, email, login, password, role, address]
+
+    UserUpdateRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          maxLength: 150
+          example: "João Silva Santos"
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          example: "joao.silva.updated@example.com"
+        role:
+          $ref: "#/components/schemas/UserRole"
+        address:
+          $ref: "#/components/schemas/AddressDTO"
+      required: [name, email, role, address]
+
+    UserResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: "João Silva"
+        email:
+          type: string
+          format: email
+          example: "joao.silva@example.com"
+        login:
+          type: string
+          example: "joao.silva"
+        role:
+          $ref: "#/components/schemas/UserRole"
+        address:
+          $ref: "#/components/schemas/AddressDTO"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-01-03T10:30:00.000Z"
+        lastModifiedAt:
+          type: string
+          format: date-time
+          example: "2026-01-03T10:30:00.000Z"
+      required: [id, name, email, login, role, address, createdAt, lastModifiedAt]
+
+    LoginValidateRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        login:
+          type: string
+          example: "joao.silva"
+        password:
+          type: string
+          format: password
+          example: "Senha@123"
+      required: [login, password]
+
+    LoginValidateResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        valid:
+          type: boolean
+          example: true
+      required: [valid]
+
+    ChangePasswordRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        currentPassword:
+          type: string
+          format: password
+          example: "Senha@123"
+        newPassword:
+          type: string
+          format: password
+          example: "NovaSenh@456"
+        confirmPassword:
+          type: string
+          format: password
+          example: "NovaSenh@456"
+      required: [currentPassword, newPassword, confirmPassword]
+
+    ProblemDetailExtended:
+      type: object
+      description: |
+        Extensão do RFC 7807 (Problem Details) com campos adicionais usados no projeto.
+      additionalProperties: true
+      properties:
+        type:
+          type: string
+          format: uri
+          example: "https://api.fiap.com/errors/409"
+        title:
+          type: string
+          example: "Email Duplicado"
+        status:
+          type: integer
+          format: int32
+          example: 409
+        detail:
+          type: string
+          example: "Email 'joao@example.com' já está registrado"
+        instance:
+          type: string
+          example: "/api/v1/users"
+        traceId:
+          type: string
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-01-03T10:30:00.000Z"
+        errorCode:
+          type: string
+          example: "DUPLICATE_EMAIL"
+        severity:
+          type: string
+          example: "error"
+      required: [title, status, detail, instance]
