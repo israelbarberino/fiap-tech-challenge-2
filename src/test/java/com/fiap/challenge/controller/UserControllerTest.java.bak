@@ -1,0 +1,196 @@
+package com.fiap.challenge.controller;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fiap.challenge.dto.AddressDTO;
+import com.fiap.challenge.dto.ChangePasswordRequest;
+import com.fiap.challenge.dto.LoginValidateRequest;
+import com.fiap.challenge.dto.UserCreateRequest;
+import com.fiap.challenge.dto.UserResponse;
+import com.fiap.challenge.dto.UserUpdateRequest;
+import com.fiap.challenge.entity.UserRole;
+import com.fiap.challenge.service.UserService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@WebMvcTest(UserController.class)
+@DisplayName("UserController Tests")
+class UserControllerTest {
+    
+    @Autowired
+    private MockMvc mockMvc;
+    
+    @Autowired
+    private ObjectMapper objectMapper;
+    
+    @MockBean
+    private UserService userService;
+    
+    private UserResponse userResponse;
+    private UserCreateRequest createRequest;
+    private AddressDTO addressDTO;
+    
+    @BeforeEach
+    void setUp() {
+        addressDTO = new AddressDTO(
+            "Rua das Flores",
+            "123",
+            "Apto 456",
+            "São Paulo",
+            "SP",
+            "01234-567"
+        );
+        
+        userResponse = new UserResponse();
+        userResponse.setId(1L);
+        userResponse.setName("João Silva");
+        userResponse.setEmail("joao@example.com");
+        userResponse.setLogin("joao.silva");
+        userResponse.setRole(UserRole.USER);
+        userResponse.setAddress(addressDTO);
+        userResponse.setCreatedAt(LocalDateTime.now());
+        userResponse.setLastModifiedAt(LocalDateTime.now());
+        
+        createRequest = new UserCreateRequest(
+            "João Silva",
+            "joao@example.com",
+            "joao.silva",
+            "senha123",
+            UserRole.USER,
+            addressDTO
+        );
+    }
+    
+    @Test
+    @DisplayName("Deve criar usuário e retornar 201")
+    void testCreateUser() throws Exception {
+        when(userService.createUser(any(UserCreateRequest.class)))
+            .thenReturn(userResponse);
+        
+        mockMvc.perform(post("/api/v1/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createRequest)))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.id").value(1))
+            .andExpect(jsonPath("$.name").value("João Silva"))
+            .andExpect(jsonPath("$.email").value("joao@example.com"));
+    }
+    
+    @Test
+    @DisplayName("Deve retornar 400 ao criar usuário com dados inválidos")
+    void testCreateUserWithInvalidData() throws Exception {
+        UserCreateRequest invalidRequest = new UserCreateRequest(
+            "",  // nome vazio
+            "email-invalido",  // email inválido
+            "",  // login vazio
+            "",  // password vazia
+            UserRole.USER,
+            addressDTO
+        );
+        
+        mockMvc.perform(post("/api/v1/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidRequest)))
+            .andExpect(status().isBadRequest());
+    }
+    
+    @Test
+    @DisplayName("Deve atualizar usuário e retornar 200")
+    void testUpdateUser() throws Exception {
+        UserUpdateRequest updateRequest = new UserUpdateRequest(
+            "João Silva Updated",
+            "joao.updated@example.com",
+            UserRole.MANAGER,
+            addressDTO
+        );
+        
+        when(userService.updateUser(anyLong(), any(UserUpdateRequest.class)))
+            .thenReturn(userResponse);
+        
+        mockMvc.perform(put("/api/v1/users/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateRequest)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(1))
+            .andExpect(jsonPath("$.name").value("João Silva"));
+    }
+    
+    @Test
+    @DisplayName("Deve alterar senha e retornar 204")
+    void testChangePassword() throws Exception {
+        ChangePasswordRequest changeRequest = new ChangePasswordRequest(
+            "senha123",
+            "novaSenha456",
+            "novaSenha456"
+        );
+        
+        doNothing().when(userService).changePassword(anyLong(), any(ChangePasswordRequest.class));
+        
+        mockMvc.perform(patch("/api/v1/users/1/password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(changeRequest)))
+            .andExpect(status().isNoContent());
+    }
+    
+    @Test
+    @DisplayName("Deve obter usuário por ID e retornar 200")
+    void testGetUserById() throws Exception {
+        when(userService.getUserById(1L))
+            .thenReturn(userResponse);
+        
+        mockMvc.perform(get("/api/v1/users/1")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(1))
+            .andExpect(jsonPath("$.name").value("João Silva"));
+    }
+    
+    @Test
+    @DisplayName("Deve retornar 404 ao obter usuário inexistente")
+    void testGetUserByIdNotFound() throws Exception {
+        when(userService.getUserById(999L))
+            .thenThrow(new com.fiap.challenge.exception.UserNotFoundException("Usuário não encontrado"));
+        
+        mockMvc.perform(get("/api/v1/users/999")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound());
+    }
+    
+    @Test
+    @DisplayName("Deve buscar usuários por nome e retornar 200")
+    void testGetUsersByName() throws Exception {
+        when(userService.getUsersByName("João"))
+            .thenReturn(List.of(userResponse));
+        
+        mockMvc.perform(get("/api/v1/users?name=João")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].name").value("João Silva"));
+    }
+    
+    @Test
+    @DisplayName("Deve deletar usuário e retornar 204")
+    void testDeleteUser() throws Exception {
+        doNothing().when(userService).deleteUser(1L);
+        
+        mockMvc.perform(delete("/api/v1/users/1")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNoContent());
+    }
+}
