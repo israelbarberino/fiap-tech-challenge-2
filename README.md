@@ -2,6 +2,8 @@
 
 API REST para gerenciamento de usuários com Spring Boot 3.2.1, Java 17 e PostgreSQL 15.
 
+**📖 [Documentação Online](https://seu-usuario.github.io/fiap-tech-challenge-1)** | **🔗 [Setup GitHub Pages](GITHUB_PAGES_SETUP.md)** | **📊 [Diagramas Mermaid](DIAGRAMS.md)**
+
 ## 🚀 Como Executar
 
 ### Docker (Recomendado)

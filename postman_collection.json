@@ -1,0 +1,487 @@
+{
+  "info": {
+    "_postman_id": "fiap-tech-challenge-v1",
+    "name": "FIAP Tech Challenge - User Management API",
+    "description": "API REST para Gerenciamento de Usuários - Phase 1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Autenticação",
+      "item": [
+        {
+          "name": "Validar Credenciais - Sucesso",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"joao.silva\",\n  \"password\": \"Senha@123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/auth/validate",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "auth", "validate"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Validar Credenciais - Login Inválido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"usuario.inexistente\",\n  \"password\": \"SenhaQualquer\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/auth/validate",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "auth", "validate"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Validar Credenciais - Senha Incorreta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"joao.silva\",\n  \"password\": \"SenhaErrada\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/auth/validate",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "auth", "validate"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Usuários",
+      "item": [
+        {
+          "name": "Criar Usuário - Sucesso",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"João Silva\",\n  \"email\": \"joao.silva@example.com\",\n  \"login\": \"joao.silva\",\n  \"password\": \"Senha@123\",\n  \"role\": \"CUSTOMER\",\n  \"address\": {\n    \"street\": \"Rua das Flores\",\n    \"number\": \"123\",\n    \"complement\": \"Apto 456\",\n    \"city\": \"São Paulo\",\n    \"state\": \"SP\",\n    \"zipCode\": \"01234-567\"\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Usuário - Email Duplicado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Maria Santos\",\n  \"email\": \"joao.silva@example.com\",\n  \"login\": \"maria.santos\",\n  \"password\": \"Senha@456\",\n  \"role\": \"CUSTOMER\",\n  \"address\": {\n    \"street\": \"Avenida Paulista\",\n    \"number\": \"1000\",\n    \"complement\": \"Sala 101\",\n    \"city\": \"São Paulo\",\n    \"state\": \"SP\",\n    \"zipCode\": \"01311-100\"\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Usuário - Validação Falha (Email Inválido)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Pedro Costa\",\n  \"email\": \"email-invalido\",\n  \"login\": \"pedro.costa\",\n  \"password\": \"Senha@789\",\n  \"role\": \"RESTAURANT_OWNER\",\n  \"address\": {\n    \"street\": \"Rua Augusta\",\n    \"number\": \"2500\",\n    \"city\": \"São Paulo\",\n    \"state\": \"SP\",\n    \"zipCode\": \"01305-100\"\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Usuário - Campos Obrigatórios Vazios",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"email\": \"\",\n  \"login\": \"\",\n  \"password\": \"\",\n  \"role\": \"CUSTOMER\",\n  \"address\": {\n    \"street\": \"\",\n    \"number\": \"\",\n    \"city\": \"\",\n    \"state\": \"\",\n    \"zipCode\": \"\"\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obter Usuário por ID - Sucesso",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "users", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obter Usuário por ID - Não Encontrado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users/999",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "users", "999"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Usuários por Nome",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users?name=João",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "users"],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "João"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Usuário - Sucesso",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"João Silva Santos\",\n  \"email\": \"joao.silva.updated@example.com\",\n  \"role\": \"RESTAURANT_OWNER\",\n  \"address\": {\n    \"street\": \"Avenida Paulista\",\n    \"number\": \"500\",\n    \"complement\": \"Apto 1001\",\n    \"city\": \"São Paulo\",\n    \"state\": \"SP\",\n    \"zipCode\": \"01311-100\"\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "users", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Usuário - Email Duplicado",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"João Silva\",\n  \"email\": \"maria.santos@example.com\",\n  \"role\": \"CUSTOMER\",\n  \"address\": {\n    \"street\": \"Rua das Flores\",\n    \"number\": \"123\",\n    \"complement\": \"Apto 456\",\n    \"city\": \"São Paulo\",\n    \"state\": \"SP\",\n    \"zipCode\": \"01234-567\"\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "users", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Usuário - Usuário Não Encontrado",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Usuario Fantasma\",\n  \"email\": \"fantasma@example.com\",\n  \"role\": \"CUSTOMER\",\n  \"address\": {\n    \"street\": \"Rua Fantasma\",\n    \"number\": \"666\",\n    \"city\": \"Cidade Fantasma\",\n    \"state\": \"XX\",\n    \"zipCode\": \"00000-000\"\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users/999",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "users", "999"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Alterar Senha - Sucesso",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"Senha@123\",\n  \"newPassword\": \"NovaSenh@456\",\n  \"confirmPassword\": \"NovaSenh@456\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users/1/password",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "users", "1", "password"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Alterar Senha - Senha Atual Incorreta",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"SenhaErrada\",\n  \"newPassword\": \"OutraSenh@789\",\n  \"confirmPassword\": \"OutraSenh@789\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users/1/password",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "users", "1", "password"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Alterar Senha - Confirmação Não Confere",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"Senha@123\",\n  \"newPassword\": \"NovaSenh@456\",\n  \"confirmPassword\": \"OutraSenh@999\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users/1/password",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "users", "1", "password"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Alterar Senha - Usuário Não Encontrado",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"Senha@123\",\n  \"newPassword\": \"NovaSenh@456\",\n  \"confirmPassword\": \"NovaSenh@456\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users/999/password",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "users", "999", "password"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Usuário - Sucesso",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "users", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Usuário - Não Encontrado",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users/999",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "users", "999"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Documentação",
+      "item": [
+        {
+          "name": "Swagger UI",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/swagger-ui.html",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["swagger-ui.html"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "OpenAPI JSON",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/v3/api-docs",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["v3", "api-docs"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/actuator/health",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["actuator", "health"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
