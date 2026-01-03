@@ -1,0 +1,79 @@
+# GitHub Pages Jekyll Configuration
+# Theme and site settings for FIAP Tech Challenge documentation
+
+# Site settings
+title: FIAP Tech Challenge Phase 1
+description: User Management API - Clean Architecture | Spring Boot 3.2.1 | Java 17 | PostgreSQL 15
+url: https://seu-usuario.github.io/fiap-tech-challenge-1
+baseurl: /fiap-tech-challenge-1
+
+# GitHub Pages theme
+theme: jekyll-theme-slate
+
+# Jekyll settings
+markdown: kramdown
+highlighter: rouge
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-include-cache
+
+# Front matter defaults
+defaults:
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "default"
+
+# Collections
+collections:
+  docs:
+    output: true
+    permalink: /docs/:path/
+
+# Exclude files from build
+exclude:
+  - src/
+  - target/
+  - .git/
+  - .github/
+  - pom.xml
+  - Dockerfile
+  - docker-compose.yml
+  - Makefile
+  - setup.sh
+
+# Include
+include:
+  - .htaccess
+
+# Sass settings
+sass:
+  sass_dir: _sass
+  style: compressed
+
+# Kramdown settings
+kramdown:
+  input: GFM
+  hard_wrap: false
+  auto_ids: true
+  toc_levels: 1..6
+  entity_output: numeric
+  smart_quotes: lsquo,rsquo,ldquo,rdquo
+  syntax_highlighter: rouge
+
+# Author info
+author:
+  name: Israel Barberino
+  email: seu-email@example.com
+
+# Repository
+repository: seu-usuario/fiap-tech-challenge-1
+
+# Timezone
+timezone: America/Sao_Paulo
+
+# Build settings
+future: true
+show_drafts: false

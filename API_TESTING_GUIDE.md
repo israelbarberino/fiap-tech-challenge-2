@@ -1,17 +1,22 @@
 # API Testing Guide
 
-Este guia fornece exemplos de como testar os endpoints da API User Management.
+Examples and patterns for testing the User Management API.
 
-## 📌 Pré-requisitos
+---
 
-- cURL ou Postman instalado
-- Aplicação rodando em `http://localhost:8080`
-- PostgreSQL rodando com dados iniciais (veja `init.sql`)
+## 📌 Prerequisites
 
-## 🔌 Exemplos de Requisições
+- cURL or Postman installed
+- Application running on `http://localhost:8080`
+- PostgreSQL running (Docker or local)
 
-### 1. Criar Usuário
+---
 
+## 🔌 Request Examples
+
+### 1. Create User
+
+**Request:**
 ```bash
 curl -X POST http://localhost:8080/api/v1/users \
   -H "Content-Type: application/json" \
@@ -19,12 +24,11 @@ curl -X POST http://localhost:8080/api/v1/users \
     "name": "João Silva",
     "email": "joao@example.com",
     "login": "joao.silva",
-    "password": "senha123",
+    "password": "Senha@123",
     "role": "CUSTOMER",
     "address": {
       "street": "Rua das Flores",
       "number": "123",
-      "complement": "Apto 456",
       "city": "São Paulo",
       "state": "SP",
       "zipCode": "01234-567"
@@ -39,25 +43,18 @@ curl -X POST http://localhost:8080/api/v1/users \
   "name": "João Silva",
   "email": "joao@example.com",
   "login": "joao.silva",
-  "role": "USER",
-  "address": {
-    "street": "Rua das Flores",
-    "number": "123",
-    "complement": "Apto 456",
-    "city": "São Paulo",
-    "state": "SP",
-    "zipCode": "01234-567"
-  },
-  "createdAt": "2026-01-03T10:30:00",
-  "lastModifiedAt": "2026-01-03T10:30:00"
+  "role": "CUSTOMER",
+  "createdAt": "2026-01-03T16:42:00Z",
+  "lastModifiedAt": "2026-01-03T16:42:00Z"
 }
 ```
 
-### 2. Obter Usuário por ID
+---
+
+### 2. Get User by ID
 
 ```bash
-curl -X GET http://localhost:8080/api/v1/users/1 \
-  -H "Content-Type: application/json"
+curl -X GET http://localhost:8080/api/v1/users/1
 ```
 
 **Response (200 OK):**
@@ -67,18 +64,19 @@ curl -X GET http://localhost:8080/api/v1/users/1 \
   "name": "João Silva",
   "email": "joao@example.com",
   "login": "joao.silva",
-  "role": "USER",
+  "role": "CUSTOMER",
   "address": {...},
-  "createdAt": "2026-01-03T10:30:00",
-  "lastModifiedAt": "2026-01-03T10:30:00"
+  "createdAt": "2026-01-03T16:42:00Z",
+  "lastModifiedAt": "2026-01-03T16:42:00Z"
 }
 ```
 
-### 3. Buscar Usuários por Nome
+---
+
+### 3. Search by Name
 
 ```bash
-curl -X GET "http://localhost:8080/api/v1/users?name=João" \
-  -H "Content-Type: application/json"
+curl "http://localhost:8080/api/v1/users?name=João"
 ```
 
 **Response (200 OK):**
@@ -88,28 +86,25 @@ curl -X GET "http://localhost:8080/api/v1/users?name=João" \
     "id": 1,
     "name": "João Silva",
     "email": "joao@example.com",
-    "login": "joao.silva",
-    "role": "USER",
-    "address": {...},
-    "createdAt": "2026-01-03T10:30:00",
-    "lastModifiedAt": "2026-01-03T10:30:00"
+    "role": "CUSTOMER"
   }
 ]
 ```
 
-### 4. Atualizar Usuário
+---
+
+### 4. Update User
 
 ```bash
 curl -X PUT http://localhost:8080/api/v1/users/1 \
   -H "Content-Type: application/json" \
   -d '{
     "name": "João Silva Updated",
-    "email": "joao.updated@example.com",
+    "email": "joao.new@example.com",
     "role": "RESTAURANT_OWNER",
     "address": {
       "street": "Rua Atualizada",
       "number": "456",
-      "complement": "Sala 789",
       "city": "São Paulo",
       "state": "SP",
       "zipCode": "02234-567"
@@ -122,31 +117,198 @@ curl -X PUT http://localhost:8080/api/v1/users/1 \
 {
   "id": 1,
   "name": "João Silva Updated",
-  "email": "joao.updated@example.com",
-  "login": "joao.silva",
+  "email": "joao.new@example.com",
   "role": "RESTAURANT_OWNER",
-  "address": {...},
-  "createdAt": "2026-01-03T10:30:00",
-  "lastModifiedAt": "2026-01-03T10:35:00"
+  "lastModifiedAt": "2026-01-03T16:45:00Z"
 }
 ```
 
-### 5. Alterar Senha
+---
+
+### 5. Change Password
 
 ```bash
 curl -X PATCH http://localhost:8080/api/v1/users/1/password \
   -H "Content-Type: application/json" \
   -d '{
-    "currentPassword": "senha123",
-    "newPassword": "novaSenha456",
-    "confirmPassword": "novaSenha456"
+    "currentPassword": "Senha@123",
+    "newPassword": "NovaSenha@456",
+    "confirmPassword": "NovaSenha@456"
   }'
 ```
 
 **Response (204 No Content):**
 ```
-(sem corpo de resposta)
+(empty body)
 ```
+
+---
+
+### 6. Delete User
+
+```bash
+curl -X DELETE http://localhost:8080/api/v1/users/1
+```
+
+**Response (204 No Content):**
+```
+(empty body)
+```
+
+---
+
+### 7. Validate Credentials
+
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/validate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "login": "joao.silva",
+    "password": "Senha@123"
+  }'
+```
+
+**Success (200 OK):**
+```json
+{
+  "message": "Credenciais válidas"
+}
+```
+
+**Failure (401):**
+```json
+{
+  "type": "https://api.example.com/errors/401",
+  "title": "Unauthorized",
+  "status": 401,
+  "detail": "Invalid credentials"
+}
+```
+
+---
+
+## ❌ Error Scenarios
+
+### Invalid Email Format
+
+```bash
+curl -X POST http://localhost:8080/api/v1/users \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Test",
+    "email": "invalid-email",  # Missing @domain
+    "login": "test.user",
+    "password": "Weak123",  # Missing special char
+    "role": "CUSTOMER"
+  }'
+```
+
+**Response (400 Bad Request):**
+```json
+{
+  "type": "https://api.example.com/errors/400",
+  "title": "Bad Request",
+  "status": 400,
+  "detail": "Validation failed",
+  "errorCode": "VALIDATION_ERROR",
+  "errors": [
+    {
+      "field": "email",
+      "message": "Invalid email format"
+    },
+    {
+      "field": "password",
+      "message": "Password must contain special character"
+    }
+  ]
+}
+```
+
+---
+
+### Duplicate Email
+
+```bash
+curl -X POST http://localhost:8080/api/v1/users \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Duplicate",
+    "email": "joao@example.com",  # Already exists
+    "login": "duplicate.user",
+    "password": "NewPass@123",
+    "role": "CUSTOMER"
+  }'
+```
+
+**Response (409 Conflict):**
+```json
+{
+  "type": "https://api.example.com/errors/409",
+  "title": "Conflict - Duplicate Email",
+  "status": 409,
+  "detail": "Email 'joao@example.com' is already registered",
+  "errorCode": "DUPLICATE_EMAIL"
+}
+```
+
+---
+
+### User Not Found
+
+```bash
+curl -X GET http://localhost:8080/api/v1/users/999
+```
+
+**Response (404 Not Found):**
+```json
+{
+  "type": "https://api.example.com/errors/404",
+  "title": "Not Found",
+  "status": 404,
+  "detail": "User with ID 999 not found",
+  "errorCode": "USER_NOT_FOUND"
+}
+```
+
+---
+
+## 📮 Using Postman
+
+1. Import `postman_collection.json` into Postman
+2. Set environment variable: `base_url = http://localhost:8080`
+3. Run requests in sequence:
+   - Create User
+   - Get User
+   - Update User
+   - Validate Credentials
+   - Change Password
+   - Delete User
+
+Each request includes example data and validation checks.
+
+---
+
+## 🧪 Testing Checklist
+
+- [ ] Create user with valid data → 201
+- [ ] Create user with invalid email → 400
+- [ ] Create user with duplicate email → 409
+- [ ] Get existing user → 200
+- [ ] Get non-existent user → 404
+- [ ] Search by name → 200 with results
+- [ ] Update user → 200
+- [ ] Change password → 204
+- [ ] Delete user → 204
+- [ ] Validate correct credentials → 200
+- [ ] Validate incorrect credentials → 401
+
+---
+
+## 📚 Additional Resources
+
+- [README.md](README.md) – Overview
+- [RELATORIO_TECNICO.md](RELATORIO_TECNICO.md) – Complete technical report
+- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) – Common issues
 
 ### 6. Validar Login e Senha
 

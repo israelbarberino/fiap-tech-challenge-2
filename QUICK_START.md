@@ -1,52 +1,189 @@
 # Quick Start Guide
 
-Guia rápido para começar com o projeto User Management API.
+Get started with the User Management API in 5 minutes.
 
-## ⚡ 5 Minutos para Começar
+---
 
-### Pré-requisitos
-- Docker e Docker Compose instalados
-- OU Java 17 + Maven 3.6 + PostgreSQL 13
+## ⚡ Prerequisites
 
-### Opção 1: Com Docker (Recomendado)
+- Docker & Docker Compose, **OR**
+- Java 17 + Maven 3.6 + PostgreSQL 15
+
+---
+
+## 🚀 Option 1: Docker (Recommended)
 
 ```bash
-# 1. Clone/acesse o repositório
+# Clone or navigate to project
 cd fiap-tech-challenge-1
 
-# 2. Inicie os containers
+# Start containers
 docker-compose up --build
 
-# 3. Aguarde inicialização (2-3 minutos)
-# Veja a mensagem: "Started UserManagementApplication"
+# Wait for startup (2-3 minutes)
+# Look for: "Started UserManagementApplication"
 
-# 4. Acesse
-# Swagger UI: http://localhost:8080/swagger-ui.html
-# Health: http://localhost:8080/actuator/health
+# Access API
+curl http://localhost:8080/actuator/health
+
+# Open Swagger UI
+open http://localhost:8080/swagger-ui.html
 ```
 
-### Opção 2: Localmente
+---
+
+## 🖥️ Option 2: Local Development
 
 ```bash
-# 1. Certifique-se que PostgreSQL está rodando
-psql -U postgres -c "CREATE DATABASE user_management;"
+# 1. Create database
+createdb user_management
 
-# 2. Compile e execute
+# 2. Build project
 mvn clean install
+
+# 3. Run application
 mvn spring-boot:run
 
-# 3. Acesse
-# http://localhost:8080/swagger-ui.html
+# 4. Access Swagger
+open http://localhost:8080/swagger-ui.html
 ```
 
-## 📝 Primeiro Exemplo - Criar um Usuário
+---
 
-### Via cURL
+## 📝 First API Call – Create a User
+
+### Using cURL
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/users \
   -H "Content-Type: application/json" \
   -d '{
+    "name": "João Silva",
+    "email": "joao@example.com",
+    "login": "joao.silva",
+    "password": "Senha@123",
+    "role": "CUSTOMER",
+    "address": {
+      "street": "Rua das Flores",
+      "number": "123",
+      "city": "São Paulo",
+      "state": "SP",
+      "zipCode": "01234-567"
+    }
+  }'
+```
+
+**Response (201 Created):**
+```json
+{
+  "id": 1,
+  "name": "João Silva",
+  "email": "joao@example.com",
+  "login": "joao.silva",
+  "role": "CUSTOMER",
+  "createdAt": "2026-01-03T16:42:00Z",
+  "lastModifiedAt": "2026-01-03T16:42:00Z"
+}
+```
+
+---
+
+## 🔑 Validate Credentials
+
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/validate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "login": "joao.silva",
+    "password": "Senha@123"
+  }'
+```
+
+**Response (200 OK):**
+```json
+{
+  "message": "Credenciais válidas"
+}
+```
+
+**Invalid (401):**
+```json
+{
+  "type": "https://api.example.com/errors/401",
+  "title": "Unauthorized",
+  "status": 401,
+  "detail": "Invalid credentials"
+}
+```
+
+---
+
+## 🔍 Search User by Name
+
+```bash
+curl http://localhost:8080/api/v1/users?name=João
+```
+
+---
+
+## 📋 Available Endpoints
+
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| POST | `/api/v1/users` | Create user |
+| GET | `/api/v1/users/{id}` | Get by ID |
+| GET | `/api/v1/users?name=` | Search by name |
+| PUT | `/api/v1/users/{id}` | Update user |
+| PATCH | `/api/v1/users/{id}/password` | Change password |
+| DELETE | `/api/v1/users/{id}` | Delete user |
+| POST | `/api/v1/auth/validate` | Validate login |
+
+---
+
+## 🧪 Run Tests
+
+```bash
+# All tests
+mvn clean verify
+
+# Unit tests only
+mvn test
+
+# With coverage report
+mvn jacoco:report
+open target/site/jacoco/index.html
+```
+
+---
+
+## 🛑 Troubleshooting
+
+**Container won't start?**
+```bash
+docker-compose down
+docker-compose up --build
+```
+
+**Port 8080 already in use?**
+```bash
+# Change in docker-compose.yml or application.properties
+lsof -i :8080  # See what's using it
+```
+
+**Database connection error?**
+```bash
+# Check PostgreSQL is running
+docker ps
+docker logs fiap-tech-challenge-1_postgres_1
+```
+
+---
+
+## 📚 Next Steps
+
+- Read [API_TESTING_GUIDE.md](API_TESTING_GUIDE.md) for detailed examples
+- Check [RELATORIO_TECNICO.md](RELATORIO_TECNICO.md) for complete documentation
+- See [BEST_PRACTICES.md](BEST_PRACTICES.md) for architectural patterns
     "name": "João Silva",
     "email": "joao@example.com",
     "login": "joao.silva",

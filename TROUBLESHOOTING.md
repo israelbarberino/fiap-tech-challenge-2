@@ -1,93 +1,120 @@
 # Troubleshooting & FAQ
 
-## 🔧 Problemas Comuns
+Common issues and solutions.
 
-### PostgreSQL
+---
 
-#### Erro: Connection refused
+## 🐘 PostgreSQL Issues
 
+### Connection Refused
+
+**Problem:**
 ```
-Exception in thread "main" java.sql.SQLException: 
-Connection to localhost:5432 refused
+java.sql.SQLException: Connection to localhost:5432 refused
 ```
 
-**Solução:**
+**Solution:**
 ```bash
-# Verificar se PostgreSQL está rodando
-# Linux/Mac
-sudo systemctl status postgresql
+# Check if PostgreSQL is running
 docker ps | grep postgres
 
-# Windows
-# Verificar em Services ou usar docker
+# Start via Docker Compose
 docker-compose up postgres -d
+
+# Or verify local PostgreSQL
+sudo systemctl status postgresql
 ```
 
-#### Erro: Database "user_management" does not exist
+---
 
-**Solução:**
+### Database Does Not Exist
+
+**Problem:**
+```
+ERROR: database "user_management" does not exist
+```
+
+**Solution:**
 ```bash
-# Criar banco manualmente
-psql -U postgres -c "CREATE DATABASE user_management;"
+# Create database
+createdb user_management
 
-# Ou deixar o Hibernate criar (hibernte.ddl-auto=create)
+# Or let Hibernate create it
+# In application.properties:
 spring.jpa.hibernate.ddl-auto=create
 ```
 
-#### Erro: FATAL: role "postgres" does not exist
+---
 
-**Solução:**
+### Invalid Credentials
+
+**Problem:**
+```
+FATAL: role "postgres" does not exist
+```
+
+**Solution:**
 ```bash
-# Mudar senha padrão do PostgreSQL
+# Reset PostgreSQL password
 psql -U postgres
 ALTER USER postgres WITH PASSWORD 'postgres';
 ```
 
-### Maven
+---
 
-#### Erro: [ERROR] Failed to execute goal on project
+## 🏗️ Maven Issues
 
-**Solução:**
+### Dependency Resolution Fails
+
+**Problem:**
+```
+[ERROR] Failed to execute goal on project
+```
+
+**Solution:**
 ```bash
-# Limpar cache Maven
+# Clean cache
 mvn clean
 rm -rf ~/.m2/repository
 
-# Reinstalar dependências
+# Reinstall
 mvn dependency:resolve
 mvn clean install
 ```
 
-#### Erro: [ERROR] COMPILATION ERROR: 
+---
 
-**Solução:**
+### Compilation Error
+
+**Problem:**
+```
+[ERROR] COMPILATION ERROR
+```
+
+**Solution:**
 ```bash
-# Verificar versão Java
+# Check Java version
 java -version
-# Deve ser Java 17+
+# Must be Java 17+
 
-# Verificar pom.xml
-mvn compiler:compile -X
+# Rebuild
+mvn clean compile
 ```
 
-### Spring Boot
+---
 
-#### Erro: Cannot find @Controller or @RestController in classpath
+## 🚀 Spring Boot Issues
 
-**Solução:**
-```xml
-<!-- Certificar que spring-boot-starter-web está em pom.xml -->
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-web</artifactId>
-</dependency>
+### Port Already In Use
+
+**Problem:**
+```
+Port 8080 is already in use
 ```
 
-#### Erro: Port 8080 is already in use
-
-**Solução:**
+**Solution:**
 ```bash
-# Encontrar processo usando porta 8080
+# Find process using port
 # Linux/Mac
 lsof -i :8080
 kill -9 <PID>
@@ -96,9 +123,259 @@ kill -9 <PID>
 netstat -ano | findstr :8080
 taskkill /PID <PID> /F
 
-# Ou mudar porta em application.properties
+# Or change port in application.properties
 server.port=8090
 ```
+
+---
+
+### Application Won't Start
+
+**Problem:**
+```
+Failed to start embedded Tomcat
+```
+
+**Solution:**
+```bash
+# Check logs
+docker-compose logs app
+
+# Verify all dependencies
+mvn dependency:tree
+
+# Test locally
+mvn spring-boot:run
+```
+
+---
+
+## 🐳 Docker Issues
+
+### Container Exit Immediately
+
+**Problem:**
+```
+Container exited with code 1
+```
+
+**Solution:**
+```bash
+# View logs
+docker-compose logs app
+
+# Rebuild
+docker-compose down
+docker-compose up --build
+
+# Check docker-compose.yml syntax
+docker-compose config
+```
+
+---
+
+### Build Takes Too Long
+
+**Problem:**
+```
+Docker building for 10+ minutes
+```
+
+**Solution:**
+```bash
+# Use cached layers
+docker-compose build --no-cache app
+
+# Check Dockerfile
+# Ensure dependencies cache layer is optimized
+```
+
+---
+
+## 🧪 Test Issues
+
+### Tests Fail Randomly
+
+**Problem:**
+```
+Test passed locally, failed in CI
+```
+
+**Solution:**
+```bash
+# Run all tests sequentially
+mvn test -DparallelTestClasses=false
+
+# Increase timeout
+mvn test -DargLine="-Dtimeout=10000"
+```
+
+---
+
+### Coverage Not Reaching 90%
+
+**Problem:**
+```
+Coverage: 89.5% (below threshold)
+```
+
+**Solution:**
+```bash
+# Generate report
+mvn clean verify
+mvn jacoco:report
+open target/site/jacoco/index.html
+
+# Identify uncovered lines
+# Add tests for missing branches
+```
+
+---
+
+## 🔐 Security & Validation Issues
+
+### Password Validation Fails
+
+**Problem:**
+```
+"Password must contain uppercase, digit, special character"
+```
+
+**Valid Example:**
+```
+Senha@123  ✅ (uppercase + digit + special)
+senha123   ❌ (no uppercase or special)
+Senha123!  ✅
+```
+
+---
+
+### Email Validation Fails
+
+**Problem:**
+```
+"Invalid email format"
+```
+
+**Valid Examples:**
+```
+user@example.com        ✅
+user+tag@example.co.uk  ✅
+invalid@.com            ❌
+noatsign.com            ❌
+```
+
+---
+
+### Duplicate Email Error
+
+**Problem:**
+```
+"Email 'joao@example.com' is already registered"
+```
+
+**Solution:**
+```bash
+# Use unique email for each test
+curl -X POST http://localhost:8080/api/v1/users \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "unique-email-'$(date +%s)'@example.com",
+    ...
+  }'
+
+# Or delete previous user
+curl -X DELETE http://localhost:8080/api/v1/users/1
+```
+
+---
+
+## 🌐 API Issues
+
+### CORS Errors
+
+**Problem:**
+```
+Access to XMLHttpRequest blocked by CORS policy
+```
+
+**Solution:**
+- Not applicable in Phase 1 (backend-only)
+- CORS will be configured in Phase 2 when frontend is added
+
+---
+
+### 401 Unauthorized on Valid Credentials
+
+**Problem:**
+```
+Status: 401 "Invalid credentials"
+```
+
+**Solution:**
+```bash
+# Verify password is correct
+curl -X POST http://localhost:8080/api/v1/auth/validate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "login": "joao.silva",
+    "password": "Senha@123"
+  }'
+
+# Note: Password is case-sensitive
+# Must include uppercase, digit, special char if created with validation
+```
+
+---
+
+### 404 Not Found
+
+**Problem:**
+```
+"User with ID 999 not found"
+```
+
+**Solution:**
+```bash
+# List all users
+curl "http://localhost:8080/api/v1/users?name="
+
+# Get valid user ID first
+# Then use it in subsequent requests
+```
+
+---
+
+## 📊 Health Check
+
+**Verify Application Status:**
+```bash
+curl http://localhost:8080/actuator/health
+```
+
+**Expected Response (200):**
+```json
+{
+  "status": "UP",
+  "components": {
+    "db": {
+      "status": "UP",
+      "details": {
+        "database": "PostgreSQL"
+      }
+    }
+  }
+}
+```
+
+---
+
+## 📚 More Help
+
+- [README.md](README.md) – Overview and setup
+- [QUICK_START.md](QUICK_START.md) – 5-minute start
+- [API_TESTING_GUIDE.md](API_TESTING_GUIDE.md) – API examples
+- [RELATORIO_TECNICO.md](RELATORIO_TECNICO.md) – Complete documentation
 
 #### Erro: Failed to initialize pool
 
@@ -373,7 +650,39 @@ cp src/main/java/com/fiap/challenge/controller/UserController.java \
 
 ---
 
-## 🔗 Links Úteis
+## � Segurança: Actuator Endpoints
+
+### Endpoints Protegidos
+
+**Mudança (Janeiro 2026):** Endpoints do Actuator foram protegidos para prevenir vazamento de informações.
+
+**Acesso Público:**
+```bash
+curl http://localhost:8080/actuator/health
+# Resposta: {"status":"UP"}  # Apenas status básico
+```
+
+**Acesso Autenticado (detalhes completos):**
+```bash
+curl -u admin:senha http://localhost:8080/actuator/health
+# Requer HTTP Basic com role ACTUATOR_ADMIN
+```
+
+**Configuração:**
+```bash
+# Criar .env (não commitar!)
+MANAGEMENT_SECURITY_USERNAME=admin
+MANAGEMENT_SECURITY_PASSWORD=sua_senha_forte
+
+# Aplicar
+mvn spring-boot:run
+```
+
+**Produção:** Use secrets manager (AWS Secrets Manager, Azure Key Vault, HashiCorp Vault).
+
+---
+
+## �🔗 Links Úteis
 
 - [Spring Boot Documentation](https://spring.io/projects/spring-boot)
 - [Spring Data JPA](https://spring.io/projects/spring-data-jpa)

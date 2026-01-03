@@ -20,8 +20,7 @@ public class GlobalExceptionHandler {
 
     private static final String SEVERITY_ERROR = "error";
     private static final String SEVERITY_CRITICAL = "critical";
-    private ProblemDetail buildProblemDetail(HttpStatus status, String title, String detail, 
-                                            String severity, WebRequest request) {
+    private ProblemDetail buildProblemDetail(HttpStatus status, String title, String detail, String severity, WebRequest request) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(status);
         String traceId = UUID.randomUUID().toString();
         
