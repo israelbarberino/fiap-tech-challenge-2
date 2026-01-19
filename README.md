@@ -90,3 +90,6 @@ curl -X POST http://localhost:8080/api/v1/auth/validate \
 ---
 
 **Licença:** MIT
+
+
+URL LATEX: https://www.overleaf.com/project/6959a35c227815c078bca22d
