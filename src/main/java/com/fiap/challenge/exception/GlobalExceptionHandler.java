@@ -52,6 +52,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problemDetail);
     }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ProblemDetail> handleResourceNotFoundException(
+            ResourceNotFoundException ex, WebRequest request) {
+        ProblemDetail problemDetail = buildProblemDetail(
+            HttpStatus.NOT_FOUND,
+            "Recurso Não Encontrado",
+            ex.getMessage(),
+            SEVERITY_ERROR,
+            request
+        );
+        problemDetail.setProperty("errorCode", "RESOURCE_NOT_FOUND");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problemDetail);
+    }
+
     @ExceptionHandler(DuplicateEmailException.class)
     public ResponseEntity<ProblemDetail> handleDuplicateEmailException(
             DuplicateEmailException ex, WebRequest request) {

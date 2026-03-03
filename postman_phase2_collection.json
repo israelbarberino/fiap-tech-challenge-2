@@ -1,0 +1,332 @@
+{
+  "info": {
+    "_postman_id": "phase-2-collection",
+    "name": "FIAP Tech Challenge - Phase 2",
+    "description": "Collection para testar endpoints da API de gerenciamento de usuários, tipos de usuários, restaurantes e cardápios",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "User Types",
+      "item": [
+        {
+          "name": "Create User Type",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dono de Restaurante\",\n  \"description\": \"Usuário que possui um restaurante\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/user-types",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "user-types"]
+            }
+          }
+        },
+        {
+          "name": "Get All User Types",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/user-types",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "user-types"]
+            }
+          }
+        },
+        {
+          "name": "Get User Type by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/user-types/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "user-types", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get User Type by Name",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/user-types/name/Dono de Restaurante",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "user-types", "name", "Dono de Restaurante"]
+            }
+          }
+        },
+        {
+          "name": "Update User Type",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Proprietário de Restaurante\",\n  \"description\": \"Usuário que é proprietário de um ou mais restaurantes\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/user-types/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "user-types", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete User Type",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/user-types/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "user-types", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Restaurants",
+      "item": [
+        {
+          "name": "Create Restaurant",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Trattoria Italia\",\n  \"cuisineType\": \"Italiana\",\n  \"openingTime\": \"11:00:00\",\n  \"closingTime\": \"22:00:00\",\n  \"address\": {\n    \"street\": \"Avenida Paulista\",\n    \"number\": \"1000\",\n    \"complement\": \"Apto 101\",\n    \"city\": \"São Paulo\",\n    \"state\": \"SP\",\n    \"zipCode\": \"01311-100\"\n  },\n  \"ownerId\": 1\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/restaurants",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "restaurants"]
+            }
+          }
+        },
+        {
+          "name": "Get All Restaurants",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/restaurants",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "restaurants"]
+            }
+          }
+        },
+        {
+          "name": "Get Restaurant by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/restaurants/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "restaurants", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get Restaurant by Name",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/restaurants/name/Trattoria Italia",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "restaurants", "name", "Trattoria Italia"]
+            }
+          }
+        },
+        {
+          "name": "Get Restaurants by Cuisine Type",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/restaurants/cuisine/Italiana",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "restaurants", "cuisine", "Italiana"]
+            }
+          }
+        },
+        {
+          "name": "Update Restaurant",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Trattoria Italia Premium\",\n  \"cuisineType\": \"Italiana\",\n  \"openingTime\": \"12:00:00\",\n  \"closingTime\": \"23:00:00\",\n  \"address\": {\n    \"street\": \"Avenida Paulista\",\n    \"number\": \"1000\",\n    \"complement\": \"Apto 101\",\n    \"city\": \"São Paulo\",\n    \"state\": \"SP\",\n    \"zipCode\": \"01311-100\"\n  },\n  \"ownerId\": 1\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/restaurants/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "restaurants", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Restaurant",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/restaurants/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "restaurants", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Menu Items",
+      "item": [
+        {
+          "name": "Create Menu Item",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Pasta Carbonara\",\n  \"description\": \"Massa fresca com molho de ovos, bacon e queijo parmesão\",\n  \"price\": 45.50,\n  \"availableOnPremises\": true,\n  \"photoPath\": \"/images/pasta-carbonara.jpg\",\n  \"restaurantId\": 1\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/menu-items",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "menu-items"]
+            }
+          }
+        },
+        {
+          "name": "Get All Menu Items",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/menu-items",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "menu-items"]
+            }
+          }
+        },
+        {
+          "name": "Get Menu Item by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/menu-items/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "menu-items", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get Menu Items by Restaurant",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/menu-items/restaurant/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "menu-items", "restaurant", "1"]
+            }
+          }
+        },
+        {
+          "name": "Update Menu Item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Pasta Carbonara Premium\",\n  \"description\": \"Massa fresca premium com molho de ovos caseiros, bacon especial e queijo parmesão importado\",\n  \"price\": 55.50,\n  \"availableOnPremises\": true,\n  \"photoPath\": \"/images/pasta-carbonara-premium.jpg\",\n  \"restaurantId\": 1\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/menu-items/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "menu-items", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Menu Item",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/menu-items/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "menu-items", "1"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

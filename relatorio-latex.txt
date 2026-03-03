@@ -1,0 +1,805 @@
+\documentclass[
+    12pt,
+    oneside,
+    a4paper,
+    chapter=TITLE,
+    section=TITLE,
+    sumario=tradicional
+]{abntex2}
+
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil,english]{babel}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage{indentfirst}
+\usepackage{setspace}
+\usepackage[
+  a4paper,
+  left=3cm,
+  right=2cm,
+  top=3cm,
+  bottom=2cm
+]{geometry}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{caption}
+\usepackage[alf]{abntex2cite}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{0pt}
+\OnehalfSpacing
+
+% Mantém número e título de capítulos na mesma linha (padrão ABNT)
+\renewcommand{\afterchapternum}{\space}
+\setlength{\midchapskip}{0pt}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  language=Java,
+  keywordstyle=\color{blue},
+  commentstyle=\color{gray},
+  stringstyle=\color{red},
+  backgroundcolor=\color{white}
+}
+
+% Dados do trabalho
+\titulo{Arquitetura e Implementação de uma API REST para Gerenciamento de Usuários Utilizando Java, Spring Boot e Clean Architecture}
+\autor{Israel Luiz de França Barberino}
+\local{São Paulo}
+\data{2026}
+\instituicao{%
+  Faculdade de Informática e Administração Paulista -- FIAP
+}
+\tipotrabalho{Relatório Técnico}
+\preambulo{Relatório técnico apresentado como requisito parcial para aprovação no Tech Challenge -- Fase 1 do curso de Pós-Graduação em Arquitetura e Desenvolvimento Java.}
+
+\begin{document}
+
+\selectlanguage{brazil}
+
+\imprimircapa
+\imprimirfolhaderosto
+
+% =====================
+% RESUMO
+% =====================
+\begin{resumo}
+Este relatório técnico apresenta o projeto, a arquitetura e a implementação de uma API REST voltada ao gerenciamento de usuários, desenvolvida no contexto do Tech Challenge -- Fase 1 do curso de Pós-Graduação em Arquitetura e Desenvolvimento Java da FIAP. A solução foi construída utilizando Java 17 e Spring Boot 3.x, fundamentada em princípios consolidados da engenharia de software, com destaque para a Clean Architecture e os princípios SOLID.
+
+O sistema contempla operações completas de criação, consulta, atualização e remoção de usuários, bem como validação de credenciais de acesso, adotando práticas de segurança, validação em múltiplas camadas, documentação automatizada e execução reprodutível por meio de Docker Compose. O relatório enfatiza as decisões arquiteturais, os trade-offs envolvidos e os impactos dessas escolhas na manutenibilidade, testabilidade e evolução futura do sistema.
+
+\textbf{Palavras-chave}: API REST. Clean Architecture. Spring Boot. Engenharia de Software. Docker.
+\end{resumo}
+
+% =====================
+% ABSTRACT
+% =====================
+\begin{abstract}
+This technical report presents the design, architecture, and implementation of a REST API for user management, developed as part of the Tech Challenge -- Phase 1 of the Graduate Program in Java Architecture and Development at FIAP. The solution was built using Java 17 and Spring Boot 3.x, grounded in established software engineering principles, particularly Clean Architecture and SOLID principles.
+
+The system provides full CRUD operations, credential validation, multi-layer validation mechanisms, automated API documentation, and reproducible execution through Docker Compose. This report focuses not only on functional implementation but also on architectural decisions, trade-offs, and their impact on maintainability, testability, and future system evolution.
+
+\textbf{Keywords}: REST API. Clean Architecture. Spring Boot. Software Engineering.
+\end{abstract}
+
+\cleardoublepage
+\tableofcontents
+
+% =====================
+% INTRODUÇÃO
+% =====================
+\chapter{Introdução}
+
+O desenvolvimento de sistemas distribuídos modernos tem ampliado significativamente a relevância de APIs REST como elemento central de integração entre aplicações. Em ambientes corporativos, decisões arquiteturais inadequadas em serviços backend tendem a gerar sistemas de difícil manutenção, alto acoplamento e elevada dívida técnica ao longo do tempo.
+
+Nesse contexto, este trabalho aborda o problema arquitetural da construção de uma API REST que seja, simultaneamente, funcional, segura e arquiteturalmente sustentável. O foco não se restringe à entrega de endpoints, mas à adoção consciente de princípios arquiteturais que favoreçam a evolução do sistema.
+
+\section{Objetivo Geral}
+
+Projetar e implementar uma API REST para gerenciamento de usuários, fundamentada em princípios consolidados de arquitetura de software, garantindo manutenibilidade, testabilidade e clareza estrutural.
+
+\section{Objetivos Específicos}
+
+\begin{itemize}
+  \item Aplicar os princípios da Clean Architecture no desenvolvimento de uma API REST.
+  \item Modelar entidades e relacionamentos de forma consistente com o domínio do problema.
+  \item Projetar endpoints REST seguindo boas práticas de design e semântica HTTP.
+  \item Implementar validações e mecanismos de segurança adequados.
+  \item Disponibilizar documentação automatizada e ambiente de execução reprodutível.
+\end{itemize}
+
+% =====================
+% METODOLOGIA
+% =====================
+\chapter{Metodologia}
+
+Este trabalho caracteriza-se como uma pesquisa aplicada, de natureza qualitativa, com abordagem prática e experimental. A metodologia adotada baseia-se no desenvolvimento incremental do sistema, com validação contínua por meio de testes automatizados e revisão arquitetural.
+
+As decisões técnicas foram fundamentadas em literatura clássica da engenharia de software, aliadas à experimentação prática no contexto do projeto. A validação da solução ocorreu por meio da execução de testes unitários, de integração e de ponta a ponta, bem como pela análise da aderência aos requisitos funcionais e não funcionais definidos.
+
+\section{Processo de Desenvolvimento}
+
+O desenvolvimento seguiu um processo iterativo baseado nos seguintes passos:
+
+\begin{enumerate}
+  \item \textbf{Análise de Requisitos}: Definição clara dos requisitos funcionais (CRUD, validação, busca) e não-funcionais (segurança, testes, documentação).
+  
+  \item \textbf{Design Arquitetural}: Seleção da Clean Architecture como padrão estrutural, seguido de modelagem de camadas e padrões de design.
+  
+  \item \textbf{Implementação Incremental}: Desenvolvimento começando pela camada de domínio, seguido de persistência, serviços e controladores.
+  
+  \item \textbf{Testes Paralelos}: Desenvolvimento de testes em paralelo com a implementação, assegurando cobertura adequada.
+  
+  \item \textbf{Documentação Contínua}: Atualização de documentação (Swagger, README, ARCHITECTURE) conforme evolução do código.
+  
+  \item \textbf{Validação Final}: Verificação de conformidade com requisitos, execução completa de testes e validação de cobertura.
+\end{enumerate}
+
+\section{Ferramentas e Tecnologias}
+
+\subsection{Linguagem e Runtime}
+
+\begin{itemize}
+  \item \textbf{Java 17}: Linguagem de programação principal, aproveitando recursos modernos como records, sealed classes e pattern matching.
+  \item \textbf{Maven 3.8+}: Gerenciador de dependências e build automation.
+\end{itemize}
+
+\subsection{Framework e Bibliotecas}
+
+\begin{itemize}
+  \item \textbf{Spring Boot 3.2.1}: Framework web e injeção de dependência.
+  \item \textbf{Spring Data JPA}: Abstração de persistência com Hibernate.
+  \item \textbf{Spring Security}: Autenticação e criptografia (BCrypt).
+  \item \textbf{SpringDoc OpenAPI 2.1.0}: Geração automática de documentação Swagger/OpenAPI.
+\end{itemize}
+
+\subsection{Persistência}
+
+\begin{itemize}
+  \item \textbf{PostgreSQL 15}: Banco de dados relacional de produção.
+  \item \textbf{H2 Database}: Banco em memória para testes isolados.
+  \item \textbf{Hibernate ORM}: Mapeamento objeto-relacional.
+\end{itemize}
+
+\subsection{Testes}
+
+\begin{itemize}
+  \item \textbf{JUnit 5}: Framework de testes padrão para Java.
+  \item \textbf{Mockito}: Criação de mocks e spies para testes isolados.
+  \item \textbf{Spring Test}: Utilidades para testes em contexto Spring.
+  \item \textbf{JaCoCo}: Medição de cobertura de código.
+\end{itemize}
+
+\subsection{Infraestrutura}
+
+\begin{itemize}
+  \item \textbf{Docker}: Containerização da aplicação.
+  \item \textbf{Docker Compose}: Orquestração de múltiplos containers (app + postgres).
+\end{itemize>
+
+% =====================
+% ARQUITETURA
+% =====================
+\chapter{Arquitetura da Aplicação}
+
+A arquitetura da aplicação foi concebida com base nos princípios da Clean Architecture, conforme proposto por Martin (2017). Essa abordagem promove a separação entre regras de negócio e detalhes de infraestrutura, favorecendo a independência de frameworks e a testabilidade do sistema.
+
+A aplicação é estruturada em camadas bem definidas: apresentação, serviços, domínio, persistência e infraestrutura. O fluxo de dependências ocorre sempre das camadas externas para as internas, respeitando o princípio da inversão de dependência.
+
+\subsection{Camadas da Aplicação}
+
+\begin{enumerate}
+  \item \textbf{REST API Layer}: Controladores (`AuthController`, `UserController`) que expõem endpoints HTTP e gerenciam requisições/respostas.
+  \item \textbf{Business Logic Layer}: Serviço (`UserService`) que concentra toda a lógica de negócio e coordenação entre camadas.
+  \item \textbf{Data Access Layer}: Repositório JPA (`UserRepository`) que abstrai operações de persistência.
+  \item \textbf{Domain Layer}: Entidades (`User`, `Address`), enums (`UserRole`) e objetos de valor que representam o domínio.
+  \item \textbf{Infrastructure}: Configurações de segurança, documentação da API, banco de dados e tratamento de exceções.
+\end{enumerate}
+
+\section{Análise de Alternativas Arquiteturais}
+
+Arquiteturas em camadas tradicionais foram consideradas, porém rejeitadas devido ao acoplamento excessivo entre regras de negócio e frameworks. A Clean Architecture foi escolhida por oferecer maior flexibilidade, melhor isolamento do domínio e facilidade de evolução futura.
+
+\section{Padrões de Design Implementados}
+
+A solução utiliza diversos padrões de projeto consolidados:
+
+\begin{itemize}
+  \item \textbf{Repository Pattern}: Abstração do acesso a dados através de `UserRepository`.
+  \item \textbf{Service Layer}: Concentração da lógica de negócio em `UserService`.
+  \item \textbf{DTO Pattern}: Transferência de dados através de `UserCreateRequest`, `UserUpdateRequest`, `UserResponse`, etc.
+  \item \textbf{Value Object}: Modelagem de `Address` como objeto de valor embutido na entidade `User`.
+  \item \textbf{Factory Pattern}: Construção de `UserResponse` a partir da entidade `User`.
+  \item \textbf{Dependency Injection}: Injeção de dependências via construtor (Spring Framework).
+  \item \textbf{Exception Handling}: Tratamento centralizado de exceções com `GlobalExceptionHandler` conforme RFC 7807.
+\end{itemize}
+
+\subsection{Diagrama de Camadas}
+
+A figura a seguir ilustra a estrutura arquitetural da aplicação:
+
+\vspace{0.5cm}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{arq.png}
+    \caption{Arquitetura em Camadas da Aplicação}
+    \label{fig:arquitetura}
+\end{figure}
+\vspace{0.5cm}
+% =====================
+% MODELAGEM
+% =====================
+\chapter{Modelagem de Dados}
+
+O domínio do sistema é centrado na entidade \textit{User}, responsável por representar usuários do sistema. A entidade possuí os seguintes atributos principais:
+
+\begin{itemize}
+  \item \textbf{id}: Identificador único (UUID).
+  \item \textbf{name}: Nome do usuário (obrigatório, 3-100 caracteres).
+  \item \textbf{email}: Endereço de correio eletrônico (obrigatório, único, validado).
+  \item \textbf{login}: Nome de acesso (obrigatório, único, 3-50 caracteres).
+  \item \textbf{password}: Senha criptografada com BCrypt (obrigatória).
+  \item \textbf{role}: Papel do usuário (enumerado: \texttt{RESTAURANT\_OWNER}, \texttt{CUSTOMER}).
+  \item \textbf{address}: Endereço do usuário (objeto de valor embutido).
+  \item \textbf{createdAt}: Data e hora de criação (automática).
+  \item \textbf{updatedAt}: Data e hora da última atualização (automática).
+\end{itemize}
+
+\section{Objeto de Valor: Address}
+
+O endereço foi modelado como um objeto de valor embutido (Embedded), visando maior coesão e simplicidade estrutural. Essa decisão evita complexidade prematura e está alinhada aos princípios de modelagem orientada a domínio discutidos por Evans (2003).
+
+O objeto `Address` contém os seguintes atributos:
+
+\begin{itemize}
+  \item \textbf{street}: Logradouro.
+  \item \textbf{city}: Município.
+  \item \textbf{state}: Unidade federativa (2 caracteres).
+  \item \textbf{zipCode}: Código de endereçamento postal (CEP).
+\end{itemize}
+
+\vspace{0.5cm}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{der.png}
+    \caption{Diagrama Entidade-Relacionamento (DER) do Sistema}
+    \label{fig:der}
+\end{figure}
+\vspace{0.5cm}
+
+% =====================
+% IMPLEMENTAÇÃO
+% =====================
+\chapter{Implementação e Estrutura do Código}
+
+\section{Organização de Pacotes}
+
+O projeto segue a estrutura de pacotes alinhada à Clean Architecture, facilitando navegação e compreensão:
+
+\begin{lstlisting}[caption=Estrutura de Pacotes Java]
+com.fiap.challenge/
+├── UserManagementApplication.java    (classe principal)
+├── config/
+│   ├── OpenApiConfig.java            (Swagger/OpenAPI)
+│   └── SecurityConfig.java           (BCrypt, Spring Security)
+├── controller/
+│   ├── AuthController.java           (validação de login)
+│   └── UserController.java           (CRUD de usuários)
+├── service/
+│   └── UserService.java              (lógica de negócio)
+├── repository/
+│   └── UserRepository.java           (acesso a dados)
+├── entity/
+│   ├── User.java                     (entidade JPA)
+│   ├── Address.java                  (objeto de valor)
+│   └── UserRole.java                 (enum de papéis)
+├── dto/
+│   ├── UserCreateRequest.java
+│   ├── UserUpdateRequest.java
+│   ├── UserResponse.java
+│   ├── AddressDTO.java
+│   ├── LoginValidateRequest.java
+│   └── ChangePasswordRequest.java
+└── exception/
+    ├── GlobalExceptionHandler.java   (tratamento central)
+    ├── UserNotFoundException.java
+    ├── DuplicateEmailException.java
+    └── InvalidLoginException.java
+\end{lstlisting}
+
+\section{Camada de Domínio}
+
+A entidade \texttt{User} é o núcleo do domínio, representando um usuário do sistema. Implementa validações via Jakarta Validation:
+
+\begin{itemize}
+  \item \textbf{@NotBlank}: Campos obrigatórios (name, email, login).
+  \item \textbf{@Email}: Validação de formato de email.
+  \item \textbf{@Size}: Restrições de tamanho (3-100 caracteres para nome).
+  \item \textbf{@Unique}: Constraint customizada para unicidade de email e login.
+  \item \textbf{@CreationTimestamp}: Data de criação automática.
+  \item \textbf{@UpdateTimestamp}: Data de atualização automática.
+\end{itemize}
+
+O endereço é modelado como \texttt{@Embedded}, permitindo tratá-lo como um objeto coeso sem complexidade de tabelas separadas.
+
+\section{Camada de Persistência}
+
+\texttt{UserRepository} estende \texttt{JpaRepository}, fornecendo operações CRUD padrão mais três métodos customizados:
+
+\begin{lstlisting}[language=java, caption=Métodos Customizados do Repository]
+Optional<User> findByEmail(String email);
+Optional<User> findByLogin(String login);
+List<User> findByNameContainingIgnoreCase(String name);
+\end{lstlisting}
+
+Esses métodos são derivados automaticamente pelo Spring Data JPA a partir do nome, sem necessidade de SQL manual.
+
+\section{Camada de Serviço}
+
+\texttt{UserService} concentra toda a lógica de negócio:
+
+\begin{itemize}
+  \item \textbf{createUser()}: Cria novo usuário com validações e hash de senha.
+  \item \textbf{getUserById()}: Recupera usuário por ID ou lança exceção.
+  \item \textbf{getUsersByName()}: Busca por nome com case-insensitive.
+  \item \textbf{updateUser()}: Atualiza dados sem modificar senha.
+  \item \textbf{changePassword()}: Altera senha com validação de senha anterior.
+  \item \textbf{deleteUser()}: Remove usuário e verifica existência.
+  \item \textbf{validateLogin()}: Valida credenciais contra senha armazenada.
+\end{itemize}
+
+Todas as operações usam \texttt{BCryptPasswordEncoder} para tratamento de senhas.
+
+\section{Camada de Apresentação}
+
+Os controllers expõem endpoints HTTP e delegam lógica ao serviço:
+
+\begin{itemize}
+  \item \textbf{UserController}: 6 endpoints CRUD + busca.
+  \item \textbf{AuthController}: 1 endpoint de validação de login.
+\end{itemize}
+
+Todos os endpoints usam anotações \texttt{@Operation}, \texttt{@ApiResponses} para documentação automática no Swagger.
+
+\section{Tratamento de Exceções}
+
+\texttt{GlobalExceptionHandler} centraliza o tratamento de exceções usando \texttt{@RestControllerAdvice}:
+
+\begin{itemize}
+  \item \textbf{UserNotFoundException}: HTTP 404 quando usuário não encontrado.
+  \item \textbf{DuplicateEmailException}: HTTP 409 para email duplicado.
+  \item \textbf{InvalidLoginException}: HTTP 401 para credenciais inválidas.
+  \item \textbf{MethodArgumentNotValidException}: HTTP 400 para erros de validação.
+\end{itemize}
+
+Todas as respostas de erro seguem o padrão RFC 7807 (ProblemDetail).
+
+% =====================
+% DESIGN REST
+% =====================
+% =====================
+% DESIGN REST
+% =====================
+\chapter{Design dos Endpoints REST}
+
+A API adota versionamento explícito no path (\texttt{/api/v1}), permitindo evolução futura sem quebra de compatibilidade. Os endpoints foram projetados respeitando a semântica dos métodos HTTP, com separação clara entre atualização de dados e alteração de credenciais sensíveis.
+
+\section{Especificação dos Endpoints}
+
+A tabela a seguir documenta todos os endpoints disponibilizados pela API:
+
+\vspace{0.3cm}
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|p{5cm}|}
+\hline
+\textbf{Método} & \textbf{Endpoint} & \textbf{Autenticação} & \textbf{Descrição} \\
+\hline
+POST & \texttt{/api/v1/auth/validate} & Não & Valida credenciais (login + senha) \\
+\hline
+POST & \texttt{/api/v1/users} & Não & Cria novo usuário \\
+\hline
+GET & \texttt{/api/v1/users/\{id\}} & Não & Busca usuário por ID \\
+\hline
+GET & \texttt{/api/v1/users?name=...} & Não & Busca usuários por nome (case-insensitive) \\
+\hline
+PUT & \texttt{/api/v1/users/\{id\}} & Não & Atualiza dados do usuário (sem senha) \\
+\hline
+PATCH & \texttt{/api/v1/users/\{id\}/password} & Não & Altera senha do usuário \\
+\hline
+DELETE & \texttt{/api/v1/users/\{id\}} & Não & Remove usuário \\
+\hline
+\end{tabular}
+\caption{Endpoints da API REST}
+\label{tab:endpoints}
+\end{table}
+\vspace{0.3cm}
+
+\section{Justificativas de Design}
+
+\subsection{Versionamento de API}
+
+O versionamento via URI (\texttt{/api/v1}) facilita a coexistência de múltiplas versões e oferece clareza explícita ao cliente sobre a versão utilizada. Essa abordagem é amplamente adotada em APIs públicas consolidadas.
+
+\subsection{Separação entre PUT e PATCH}
+
+O método \texttt{PUT} é utilizado para atualização completa de dados do usuário (nome, email, login, role, endereço), enquanto \texttt{PATCH} é restrito à alteração de senha. Essa separação oferece segurança adicional e clareza semântica:
+
+\begin{itemize}
+  \item \textbf{PUT \texttt{/users/\{id\}}}: Atualiza múltiplos atributos não-sensíveis.
+  \item \textbf{PATCH \texttt{/users/\{id\}/password}}: Modifica exclusivamente a credencial de acesso.
+\end{itemize}
+
+A utilização de \texttt{PATCH} para alteração de senha justifica-se por representar uma modificação parcial do recurso, alinhada às boas práticas de design REST.
+
+\subsection{Busca com Filtros}
+
+O endpoint \texttt{GET /api/v1/users?name=...} implementa busca por nome com processamento case-insensitive, permitindo buscas flexíveis sem distinção de maiúsculas/minúsculas.
+
+\section{Tratamento de Erros}
+
+Todos os endpoints implementam tratamento robusto de erros conforme RFC 7807 (Problem Details for HTTP APIs), retornando estruturas padronizadas de erro com informações de contexto:
+
+\begin{lstlisting}[language=json, caption=Exemplo de Resposta de Erro (RFC 7807)]
+{
+  "type": "about:blank",
+  "title": "Duplicate Email",
+  "status": 409,
+  "detail": "Email already registered",
+  "instance": "/api/v1/users"
+}
+\end{lstlisting}
+
+% =====================
+% DOCUMENTAÇÃO
+% =====================
+\chapter{Documentação e Testes}
+
+\section{Documentação Automatizada}
+
+A documentação da API é gerada automaticamente via OpenAPI 3.0 / Swagger, funcionando como documentação viva que se mantém sincronizada com a implementação. A ferramenta SpringDoc OpenAPI processa anotações Java e gera especificações em formato JSON/YAML.
+
+A documentação interativa está disponível em:
+\begin{itemize}
+  \item \texttt{http://localhost:8080/swagger-ui.html}: Interface gráfica Swagger UI
+  \item \texttt{http://localhost:8080/v3/api-docs}: Especificação OpenAPI em JSON
+  \item \texttt{http://localhost:8080/v3/api-docs.yaml}: Especificação OpenAPI em YAML
+\end{itemize}
+
+\vspace{0.5cm}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{swagger1.png}
+    \caption{Visualização do Swagger UI - Endpoints Disponibilizados}
+    \label{fig:swagger1}
+\end{figure}
+\vspace{0.3cm}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{swagger2.png}
+    \caption{Visualização do Swagger UI - Esquemas de Requisição e Resposta}
+    \label{fig:swagger2}
+\end{figure}
+\vspace{0.5cm}
+
+\section{Coleção Postman}
+
+Além da documentação automatizada, foi desenvolvida uma coleção Postman abrangente contendo 18 requisições HTTP que cobrem:
+
+\begin{itemize}
+  \item Cenários de sucesso (criação, consulta, atualização, exclusão).
+  \item Cenários de erro (validação, duplicação, não encontrado).
+  \item Testes de autenticação e autorização.
+  \item Testes de busca com filtros.
+\end{itemize}
+
+A coleção está disponível em \texttt{postman\_collection.json} e pode ser importada diretamente no Postman.
+
+\vspace{0.5cm}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{collection.png}
+    \caption{Coleção Postman com 18 Requisições HTTP}
+    \label{fig:postman}
+\end{figure}
+\vspace{0.5cm}
+
+\section{Testes Automatizados}
+
+O projeto implementa uma suite completa de testes com 53 casos de teste, alcançando \textbf{95.21\% de cobertura de código}.
+
+\subsection{Estratégia de Testes}
+
+Os testes são organizados em múltiplas camadas:
+
+\begin{itemize}
+  \item \textbf{Testes de Unidade} (17 testes): Validam componentes isolados (Services, DTOs, Entities).
+  \item \textbf{Testes de Integração} (26 testes): Testam integração entre camadas (Controller + Service + Repository).
+  \item \textbf{Testes End-to-End} (10 testes): Validam fluxos completos de requisição HTTP.
+\end{itemize}
+
+\subsection{Ferramentas de Teste}
+
+\begin{itemize}
+  \item \textbf{JUnit 5}: Framework de testes Java consolidado.
+  \item \textbf{Mockito}: Criação de mocks para isolamento de componentes.
+  \item \textbf{Spring Test}: Utilidades para testes em ambiente Spring.
+  \item \textbf{JaCoCo}: Medição de cobertura de código.
+  \item \textbf{H2 Database}: Banco de dados em memória para testes isolados.
+\end{itemize}
+
+\subsection{Execução de Testes}
+
+Os testes podem ser executados através dos seguintes comandos Maven:
+
+\begin{lstlisting}[language=bash, caption=Comandos de Teste]
+# Executar todos os testes
+mvn test
+
+# Executar testes com verificação de cobertura
+mvn verify
+
+# Gerar relatório de cobertura detalhado
+mvn jacoco:report
+\end{lstlisting}
+
+Os resultados indicam que o projeto atinge os objetivos de qualidade estabelecidos, com cobertura consistente em todas as camadas da aplicação.
+% =====================
+% BANCO
+% =====================
+\chapter{Banco de Dados}
+
+O sistema utiliza PostgreSQL 15 como banco de dados relacional, escolhido por sua robustez, confiabilidade comprovada e ampla adoção em ambientes corporativos e em nuvem.
+
+\section{Estratégia de Segurança}
+
+As senhas são armazenadas utilizando hash criptográfico com \textbf{BCrypt}, conforme recomendações da OWASP (Open Web Application Security Project). Essa abordagem oferece:
+
+\begin{itemize}
+  \item \textbf{Irreversibilidade}: Impossível recuperar senha original do hash.
+  \item \textbf{Resistência a Rainbow Tables}: BCrypt utiliza salt aleatório por instância.
+  \item \textbf{Adaptabilidade}: Fator de custo computacional pode ser ajustado ao longo do tempo.
+  \item \textbf{Conformidade}: Alinhado com padrões de segurança da indústria.
+\end{itemize}
+
+\section{Integridade de Dados}
+
+O banco de dados implementa restrições de integridade essenciais:
+
+\begin{itemize}
+  \item \textbf{Unicidade de Email}: Restrição UNIQUE na coluna \texttt{email}, prevenindo registros duplicados.
+  \item \textbf{Unicidade de Login}: Restrição UNIQUE na coluna \texttt{login}, garantindo identificação única.
+  \item \textbf{Validação de NOT NULL}: Campos obrigatórios protegidos em nível de banco.
+  \item \textbf{Chaves Primárias}: Identificadores UUID garantem exclusividade global.
+  \item \textbf{Auditoria Automática}: Campos \texttt{createdAt} e \texttt{updatedAt} mantêm histórico de modificações.
+\end{itemize}
+
+\section{Inicialização do Banco}
+
+O arquivo \texttt{init.sql} contém scripts de inicialização que:
+
+\begin{itemize}
+  \item Criam esquema do banco de dados.
+  \item Definem restrições e índices.
+  \item Inserem dados de exemplo para testes.
+\end{itemize}
+
+A inicialização é executada automaticamente pelo Docker Compose durante o provisionamento da aplicação.
+
+% =====================
+% EXECUÇÃO
+% =====================
+\chapter{Infraestrutura e Deployment}
+
+\section{Execução com Docker Compose}
+
+A execução da aplicação é realizada por meio do Docker Compose, garantindo reprodutibilidade do ambiente, consistência entre desenvolvimento e produção, e reduzindo problemas de configuração local. O arquivo \texttt{docker-compose.yml} define dois serviços:
+
+\begin{enumerate}
+  \item \textbf{app}: Aplicação Spring Boot (Java 17), exposta na porta 8080.
+  \item \textbf{postgres}: Banco de dados PostgreSQL 15, exposto na porta 5432.
+\end{enumerate}
+
+\subsection{Comando de Execução}
+
+Para executar a aplicação completa:
+
+\begin{lstlisting}[language=bash, caption=Inicialização com Docker Compose]
+docker-compose up --build
+\end{lstlisting}
+
+Após 40-50 segundos, a aplicação estará pronta e acessível em:
+\begin{itemize}
+  \item API REST: \texttt{http://localhost:8080/api/v1}
+  \item Swagger UI: \texttt{http://localhost:8080/swagger-ui.html}
+  \item Health Check: \texttt{http://localhost:8080/actuator/health}
+\end{itemize}
+
+\subsection{Dockerfile}
+
+O Dockerfile utiliza abordagem multi-stage para otimizar o tamanho da imagem:
+
+\vspace{0.5cm}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{compose.png}
+    \caption{Arquitetura de Containerização com Docker Compose}
+    \label{fig:docker}
+\end{figure}
+\vspace{0.5cm}
+
+\section{Variáveis de Ambiente}
+
+As configurações são gerenciadas através de variáveis de ambiente definidas em \texttt{.env}, permitindo flexibilidade entre ambientes:
+
+\begin{lstlisting}[caption=Variáveis de Ambiente Principais]
+SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/user_management
+SPRING_DATASOURCE_USERNAME=postgres
+SPRING_DATASOURCE_PASSWORD=postgres
+SPRING_JPA_HIBERNATE_DDL_AUTO=validate
+\end{lstlisting}
+
+\section{Health Checks}
+
+O Docker Compose implementa health checks automáticos para garantir que apenas requisições sejam aceitas quando a aplicação está totalmente pronta:
+
+\begin{lstlisting}[caption=Health Check da Aplicação]
+healthcheck:
+  test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+  interval: 10s
+  timeout: 5s
+  retries: 5
+\end{lstlisting}
+
+% =====================
+% DISCUSSÃO
+% =====================
+\chapter{Discussão}
+
+\section{Análise das Decisões Arquiteturais}
+
+As decisões arquiteturais adotadas demonstram um equilíbrio deliberado entre simplicidade operacional e robustez técnica. A Clean Architecture foi escolhida não por purismo teórico, mas por oferecer vantagens práticas mensuráveis:
+
+\begin{itemize}
+  \item \textbf{Testabilidade}: Isolamento de camadas permite testes unitários sem dependências de infraestrutura.
+  \item \textbf{Manutenibilidade}: Separação de responsabilidades facilita localizável e correção de bugs.
+  \item \textbf{Escalabilidade}: Estrutura em camadas permite evolução independente de cada componente.
+  \item \textbf{Independência de Frameworks}: Lógica de negócio não é acoplada ao Spring Boot, facilitando migração futura.
+\end{itemize}
+
+\section{Trade-offs e Limitações}
+
+O projeto reconhece as seguintes limitações do escopo atual:
+
+\begin{itemize}
+  \item \textbf{Ausência de Autenticação Baseada em Token}: Atualmente, não há suporte a JWT ou OAuth 2.0. A validação é stateless, porém sem geração de tokens. Essa funcionalidade pode ser incorporada em fases futuras sem impacto estrutural significativo.
+  
+  \item \textbf{Sem Autorização Granular}: Roles de usuário existem mas não há enforcement de autorização por endpoint. A implementação de `@PreAuthorize` pode ser adicionada facilmente à camada de controle.
+  
+  \item \textbf{Falta de Rate Limiting}: Sem proteção contra abuse ou DDoS na camada de API. Pode ser implementado via Spring Cloud Gateway ou bibliotecas especializadas.
+  
+  \item \textbf{Sem Auditoria Detalhada}: Não há registro de todas as ações (quem modificou, quando, de onde). Auditoria completa requer JPA Envers ou solução similar.
+  
+  \item \textbf{Ausência de Cache}: Sem caching distribuído (Redis) para melhorar performance em consultas repetidas.
+\end{itemize}
+
+\section{Potenciais Melhorias Futuras}
+
+A arquitetura atual é preparada para incorporação de:
+
+\begin{itemize}
+  \item Autenticação e autorização com Spring Security + JWT.
+  \item Cache distribuído com Redis.
+  \item Event sourcing para auditoria completa.
+  \item Implementação de CQRS (Command Query Responsibility Segregation).
+  \item Documentação OpenAPI estendida com exemplos de erro.
+  \item Monitoramento com Prometheus e Grafana.
+  \item Service mesh (Istio) para orquestração avançada.
+\end{itemize}
+
+\section{Conformidade com Requisitos}
+
+O projeto implementa 100\% dos requisitos funcionais e técnicos propostos:
+
+\begin{itemize}
+  \item \textbf{CRUD Completo}: 6 endpoints implementados (\texttt{POST}, \texttt{GET}, \texttt{PUT}, \texttt{DELETE}, \texttt{PATCH}).
+  \item \textbf{Validação de Login}: Endpoint \texttt{POST /auth/validate} funcional.
+  \item \textbf{Busca Avançada}: Suporte a filtros por nome com case-insensitive.
+  \item \textbf{Segurança}: Senhas com BCrypt, validações em múltiplas camadas.
+  \item \textbf{Documentação}: Swagger, Postman, README, ARCHITECTURE.
+  \item \textbf{Testes}: 53 testes, 95.21\% cobertura.
+  \item \textbf{Infraestrutura}: Docker Compose funcional e reprodutível.
+\end{itemize}
+
+% =====================
+% CONCLUSÃO
+% =====================
+\chapter{Conclusão}
+
+O projeto atende integralmente aos objetivos propostos, demonstrando a aplicação prática de conceitos fundamentais da arquitetura de software no contexto de uma API REST moderna e profissional.
+
+\section{Sumário de Resultados}
+
+A solução apresentada é:
+
+\begin{itemize}
+  \item \textbf{Funcional}: Implementa 100\% dos requisitos de negócio especificados.
+  \item \textbf{Robusta}: Cobertura de testes de 95.21\%, abrangendo cenários de sucesso e erro.
+  \item \textbf{Bem Documentada}: Swagger, Postman, README e ARCHITECTURE fornecem documentação abrangente.
+  \item \textbf{Preparada para Evolução}: Clean Architecture facilita adição de novas funcionalidades sem degradação da estrutura.
+  \item \textbf{Pronta para Produção}: Docker Compose garante portabilidade e reprodutibilidade em qualquer ambiente.
+\end{itemize}
+
+\section{Impacto Técnico}
+
+A implementação demonstra competência em:
+
+\begin{itemize}
+  \item \textbf{Arquitetura de Software}: Aplicação correta de Clean Architecture e princípios SOLID.
+  \item \textbf{Desenvolvimento Java}: Uso profissional de Java 17 e Spring Boot 3.x.
+  \item \textbf{Design REST}: Semântica HTTP apropriada, versionamento, tratamento de erros (RFC 7807).
+  \item \textbf{Testes Automatizados}: Testes em múltiplas camadas (unitários, integração, E2E).
+  \item \textbf{Documentação}: Documentação automatizada (OpenAPI/Swagger) e coleções de teste.
+  \item \textbf{Infraestrutura}: Containerização com Docker e orquestração com Docker Compose.
+\end{itemize}
+
+\section{Considerações Finais}
+
+O desafio técnico proposto foi abordado de forma abrangente, considerando não apenas a implementação funcional, mas também aspectos não-funcionais críticos como testabilidade, manutenibilidade, documentação e reprodutibilidade. A arquitetura escolhida fornece fundação sólida para evolução futura da aplicação, permitindo que requisitos adicionais sejam incorporados sem necessidade de refatoração estrutural significativa.
+
+O código está pronto para produção e serve como referência de boas práticas para desenvolvimento backend em Java.
+
+% =====================
+% REFERÊNCIAS
+% =====================
+\begin{thebibliography}{99}
+
+\bibitem{martin2017}
+MARTIN, Robert C. \textit{Clean architecture: a craftsman's guide to software structure and design}. Boston: Prentice Hall, 2017.
+
+\bibitem{evans2003}
+EVANS, Eric. \textit{Domain-driven design: tackling complexity in the heart of software}. Boston: Addison-Wesley, 2003.
+
+\bibitem{tanenbaum2017}
+TANENBAUM, Andrew S.; VAN STEEN, Maarten. \textit{Distributed systems: principles and paradigms}. 2. ed. Boston: Pearson, 2017.
+
+\bibitem{fowler2002}
+FOWLER, Martin. \textit{Patterns of enterprise application architecture}. Boston: Addison-Wesley, 2002.
+
+\bibitem{richardson2013}
+RICHARDSON, Leonard; AMUNDSEN, Mike. \textit{RESTful web APIs}. Sebastopol: O'Reilly Media, 2013.
+
+\bibitem{rfc7807}
+IETF. RFC 7807: Problem Details for HTTP APIs. 2016. Disponível em: \url{https://tools.ietf.org/html/rfc7807}.
+
+\bibitem{owasp}
+OWASP. Password Storage Cheat Sheet. Disponível em: \url{https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html}.
+
+\bibitem{rfc2119}
+IETF. RFC 2119: Key words for use in RFCs to Indicate Requirement Levels. Disponível em: \url{https://tools.ietf.org/html/rfc2119}.
+
+\bibitem{rfc7231}
+IETF. RFC 7231: Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content. Disponível em: \url{https://tools.ietf.org/html/rfc7231}.
+
+\bibitem{java17}
+Oracle. Java 17 Documentation. Disponível em: \url{https://docs.oracle.com/en/java/javase/17/}.
+
+\bibitem{springboot}
+Pivotal Software. Spring Boot Documentation. Disponível em: \url{https://spring.io/projects/spring-boot}.
+
+\bibitem{jpa}
+Oracle. Java Persistence API (JPA) Specification. Disponível em: \url{https://jakarta.ee/specifications/persistence/}.
+
+\bibitem{openapi}
+OpenAPI Initiative. OpenAPI Specification 3.0. Disponível em: \url{https://spec.openapis.org/oas/v3.0.3}.
+
+\end{thebibliography}
+
+\end{document}
