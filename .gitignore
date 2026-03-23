@@ -80,6 +80,15 @@ docker-compose.override.yml
 *.temp
 .temp/
 tmp/
+tmp_*.txt
+
+# Python local environment
+.venv/
+venv/
+__pycache__/
+
+# Local one-off scripts and document processing artifacts
+scripts/update_docx_phase2.py
 
 # Backup
 *.bak
