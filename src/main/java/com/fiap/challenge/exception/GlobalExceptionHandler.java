@@ -18,8 +18,36 @@ import java.util.UUID;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    // Severity levels
     private static final String SEVERITY_ERROR = "error";
     private static final String SEVERITY_CRITICAL = "critical";
+
+    // Error messages and codes
+    private static final String ERROR_CODE_USER_NOT_FOUND = "USER_NOT_FOUND";
+    private static final String ERROR_CODE_RESOURCE_NOT_FOUND = "RESOURCE_NOT_FOUND";
+    private static final String ERROR_CODE_DUPLICATE_EMAIL = "DUPLICATE_EMAIL";
+    private static final String ERROR_CODE_INVALID_CREDENTIALS = "INVALID_CREDENTIALS";
+    private static final String ERROR_CODE_VALIDATION_FAILED = "VALIDATION_FAILED";
+    private static final String ERROR_CODE_INVALID_ARGUMENT = "INVALID_ARGUMENT";
+    private static final String ERROR_CODE_INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR";
+
+    // Error titles
+    private static final String TITLE_USER_NOT_FOUND = "Usuário Não Encontrado";
+    private static final String TITLE_RESOURCE_NOT_FOUND = "Recurso Não Encontrado";
+    private static final String TITLE_DUPLICATE_EMAIL = "Email Duplicado";
+    private static final String TITLE_INVALID_CREDENTIALS = "Credenciais Inválidas";
+    private static final String TITLE_VALIDATION_ERROR = "Erro de Validação";
+    private static final String TITLE_INVALID_ARGUMENT = "Argumento Inválido";
+    private static final String TITLE_INTERNAL_ERROR = "Erro Interno do Servidor";
+
+    // Property names
+    private static final String PROP_TRACE_ID = "traceId";
+    private static final String PROP_ERROR_CODE = "errorCode";
+    private static final String PROP_SUGGESTION = "suggestion";
+    private static final String PROP_VALIDATION_ERRORS = "validationErrors";
+    private static final String PROP_ERROR_COUNT = "errorCount";
+    private static final String PROP_EXCEPTION_TYPE = "exceptionType";
+
     private ProblemDetail buildProblemDetail(HttpStatus status, String title, String detail, String severity, WebRequest request) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(status);
         String traceId = UUID.randomUUID().toString();
@@ -29,7 +57,7 @@ public class GlobalExceptionHandler {
         problemDetail.setType(URI.create("https://api.fiap.com/errors/" + status.value()));
         problemDetail.setInstance(URI.create(request.getDescription(false).replace("uri=", "")));
         
-        problemDetail.setProperty("traceId", traceId);
+        problemDetail.setProperty(PROP_TRACE_ID, traceId);
         problemDetail.setProperty("timestamp", Instant.now());
         problemDetail.setProperty("severity", severity);
         problemDetail.setProperty("status", status.value());
@@ -43,12 +71,12 @@ public class GlobalExceptionHandler {
             UserNotFoundException ex, WebRequest request) {
         ProblemDetail problemDetail = buildProblemDetail(
             HttpStatus.NOT_FOUND,
-            "Usuário Não Encontrado",
+            TITLE_USER_NOT_FOUND,
             ex.getMessage(),
             SEVERITY_ERROR,
             request
         );
-        problemDetail.setProperty("errorCode", "USER_NOT_FOUND");
+        problemDetail.setProperty(PROP_ERROR_CODE, ERROR_CODE_USER_NOT_FOUND);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problemDetail);
     }
 
@@ -57,12 +85,12 @@ public class GlobalExceptionHandler {
             ResourceNotFoundException ex, WebRequest request) {
         ProblemDetail problemDetail = buildProblemDetail(
             HttpStatus.NOT_FOUND,
-            "Recurso Não Encontrado",
+            TITLE_RESOURCE_NOT_FOUND,
             ex.getMessage(),
             SEVERITY_ERROR,
             request
         );
-        problemDetail.setProperty("errorCode", "RESOURCE_NOT_FOUND");
+        problemDetail.setProperty(PROP_ERROR_CODE, ERROR_CODE_RESOURCE_NOT_FOUND);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problemDetail);
     }
 
@@ -71,13 +99,13 @@ public class GlobalExceptionHandler {
             DuplicateEmailException ex, WebRequest request) {
         ProblemDetail problemDetail = buildProblemDetail(
             HttpStatus.CONFLICT,
-            "Email Duplicado",
+            TITLE_DUPLICATE_EMAIL,
             ex.getMessage(),
             SEVERITY_ERROR,
             request
         );
-        problemDetail.setProperty("errorCode", "DUPLICATE_EMAIL");
-        problemDetail.setProperty("suggestion", "Use um email diferente ou recupere sua senha");
+        problemDetail.setProperty(PROP_ERROR_CODE, ERROR_CODE_DUPLICATE_EMAIL);
+        problemDetail.setProperty(PROP_SUGGESTION, "Use um email diferente ou recupere sua senha");
         return ResponseEntity.status(HttpStatus.CONFLICT).body(problemDetail);
     }
 
@@ -86,13 +114,13 @@ public class GlobalExceptionHandler {
             InvalidLoginException ex, WebRequest request) {
         ProblemDetail problemDetail = buildProblemDetail(
             HttpStatus.UNAUTHORIZED,
-            "Credenciais Inválidas",
+            TITLE_INVALID_CREDENTIALS,
             ex.getMessage(),
             SEVERITY_ERROR,
             request
         );
-        problemDetail.setProperty("errorCode", "INVALID_CREDENTIALS");
-        problemDetail.setProperty("suggestion", "Verifique seu login e senha");
+        problemDetail.setProperty(PROP_ERROR_CODE, ERROR_CODE_INVALID_CREDENTIALS);
+        problemDetail.setProperty(PROP_SUGGESTION, "Verifique seu login e senha");
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problemDetail);
     }
 
@@ -101,12 +129,12 @@ public class GlobalExceptionHandler {
             MethodArgumentNotValidException ex, WebRequest request) {
         ProblemDetail problemDetail = buildProblemDetail(
             HttpStatus.BAD_REQUEST,
-            "Erro de Validação",
+            TITLE_VALIDATION_ERROR,
             "Um ou mais campos contêm dados inválidos",
             SEVERITY_ERROR,
             request
         );
-        problemDetail.setProperty("errorCode", "VALIDATION_FAILED");
+        problemDetail.setProperty(PROP_ERROR_CODE, ERROR_CODE_VALIDATION_FAILED);
 
         Map<String, String> fieldErrors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
@@ -115,8 +143,8 @@ public class GlobalExceptionHandler {
             fieldErrors.put(fieldName, errorMessage);
         });
 
-        problemDetail.setProperty("validationErrors", fieldErrors);
-        problemDetail.setProperty("errorCount", fieldErrors.size());
+        problemDetail.setProperty(PROP_VALIDATION_ERRORS, fieldErrors);
+        problemDetail.setProperty(PROP_ERROR_COUNT, fieldErrors.size());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problemDetail);
     }
 
@@ -125,12 +153,12 @@ public class GlobalExceptionHandler {
             IllegalArgumentException ex, WebRequest request) {
         ProblemDetail problemDetail = buildProblemDetail(
             HttpStatus.BAD_REQUEST,
-            "Argumento Inválido",
+            TITLE_INVALID_ARGUMENT,
             ex.getMessage(),
             SEVERITY_ERROR,
             request
         );
-        problemDetail.setProperty("errorCode", "INVALID_ARGUMENT");
+        problemDetail.setProperty(PROP_ERROR_CODE, ERROR_CODE_INVALID_ARGUMENT);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problemDetail);
     }
 
@@ -139,13 +167,13 @@ public class GlobalExceptionHandler {
             Exception ex, WebRequest request) {
         ProblemDetail problemDetail = buildProblemDetail(
             HttpStatus.INTERNAL_SERVER_ERROR,
-            "Erro Interno do Servidor",
+            TITLE_INTERNAL_ERROR,
             "Ocorreu um erro inesperado. Use o traceId para investigação",
             SEVERITY_CRITICAL,
             request
         );
-        problemDetail.setProperty("errorCode", "INTERNAL_SERVER_ERROR");
-        problemDetail.setProperty("exceptionType", ex.getClass().getSimpleName());
+        problemDetail.setProperty(PROP_ERROR_CODE, ERROR_CODE_INTERNAL_SERVER_ERROR);
+        problemDetail.setProperty(PROP_EXCEPTION_TYPE, ex.getClass().getSimpleName());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(problemDetail);
     }
 }
