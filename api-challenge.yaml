@@ -1,9 +1,9 @@
 openapi: 3.0.3
 info:
-  title: FIAP Tech Challenge - User Management API
+  title: FIAP Tech Challenge - Management API
   description: |
-    API REST para gerenciamento de usuários (Phase 1).
-    Inclui CRUD de usuários, validação de credenciais e padronização de erros via RFC 7807 (Problem Details).
+    API REST para gerenciamento de usuários, tipos de usuário, restaurantes e itens de cardápio (Phase 1 + Phase 2).
+    Inclui validação de credenciais e padronização de erros via RFC 7807 (Problem Details).
   version: "1.0.0"
 servers:
   - url: http://localhost:8080
@@ -16,6 +16,12 @@ tags:
     description: Operações relacionadas à validação de credenciais
   - name: Usuários
     description: CRUD de usuários
+  - name: User Types
+    description: CRUD de tipos de usuário
+  - name: Restaurants
+    description: CRUD de restaurantes
+  - name: Menu Items
+    description: CRUD de itens de cardápio
   - name: Observabilidade
     description: Health check e informações operacionais
 
@@ -352,6 +358,468 @@ paths:
               schema:
                 $ref: "#/components/schemas/ProblemDetailExtended"
 
+  /api/v1/user-types:
+    post:
+      tags: [User Types]
+      summary: Criar tipo de usuário
+      operationId: createUserType
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserTypeRequestDTO"
+      responses:
+        "201":
+          description: Tipo de usuário criado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserTypeResponseDTO"
+        "400":
+          description: Erro de validação
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+
+    get:
+      tags: [User Types]
+      summary: Listar tipos de usuário
+      operationId: getAllUserTypes
+      responses:
+        "200":
+          description: Lista de tipos de usuário
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserTypeResponseDTO"
+
+  /api/v1/user-types/{id}:
+    get:
+      tags: [User Types]
+      summary: Obter tipo de usuário por ID
+      operationId: getUserTypeById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Tipo de usuário encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserTypeResponseDTO"
+        "404":
+          description: Tipo de usuário não encontrado
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+
+    put:
+      tags: [User Types]
+      summary: Atualizar tipo de usuário
+      operationId: updateUserType
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserTypeRequestDTO"
+      responses:
+        "200":
+          description: Tipo de usuário atualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserTypeResponseDTO"
+        "400":
+          description: Erro de validação
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+        "404":
+          description: Tipo de usuário não encontrado
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+
+    delete:
+      tags: [User Types]
+      summary: Remover tipo de usuário
+      operationId: deleteUserType
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Tipo de usuário removido
+        "404":
+          description: Tipo de usuário não encontrado
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+
+  /api/v1/user-types/name/{name}:
+    get:
+      tags: [User Types]
+      summary: Obter tipo de usuário por nome
+      operationId: getUserTypeByName
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Tipo de usuário encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserTypeResponseDTO"
+        "404":
+          description: Tipo de usuário não encontrado
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+
+  /api/v1/restaurants:
+    post:
+      tags: [Restaurants]
+      summary: Criar restaurante
+      operationId: createRestaurant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RestaurantRequestDTO"
+      responses:
+        "201":
+          description: Restaurante criado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RestaurantResponseDTO"
+        "400":
+          description: Erro de validação
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+
+    get:
+      tags: [Restaurants]
+      summary: Listar restaurantes
+      operationId: getAllRestaurants
+      responses:
+        "200":
+          description: Lista de restaurantes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RestaurantResponseDTO"
+
+  /api/v1/restaurants/{id}:
+    get:
+      tags: [Restaurants]
+      summary: Obter restaurante por ID
+      operationId: getRestaurantById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Restaurante encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RestaurantResponseDTO"
+        "404":
+          description: Restaurante não encontrado
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+
+    put:
+      tags: [Restaurants]
+      summary: Atualizar restaurante
+      operationId: updateRestaurant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RestaurantRequestDTO"
+      responses:
+        "200":
+          description: Restaurante atualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RestaurantResponseDTO"
+        "400":
+          description: Erro de validação
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+        "404":
+          description: Restaurante não encontrado
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+
+    delete:
+      tags: [Restaurants]
+      summary: Remover restaurante
+      operationId: deleteRestaurant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Restaurante removido
+        "404":
+          description: Restaurante não encontrado
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+
+  /api/v1/restaurants/name/{name}:
+    get:
+      tags: [Restaurants]
+      summary: Obter restaurante por nome
+      operationId: getRestaurantByName
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Restaurante encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RestaurantResponseDTO"
+        "404":
+          description: Restaurante não encontrado
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+
+  /api/v1/restaurants/cuisine/{cuisineType}:
+    get:
+      tags: [Restaurants]
+      summary: Listar restaurantes por tipo de cozinha
+      operationId: getRestaurantsByCuisine
+      parameters:
+        - name: cuisineType
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Lista de restaurantes por cozinha
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RestaurantResponseDTO"
+
+  /api/v1/menu-items:
+    post:
+      tags: [Menu Items]
+      summary: Criar item de cardápio
+      operationId: createMenuItem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MenuItemRequestDTO"
+      responses:
+        "201":
+          description: Item de cardápio criado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MenuItemResponseDTO"
+        "400":
+          description: Erro de validação
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+
+    get:
+      tags: [Menu Items]
+      summary: Listar itens de cardápio
+      operationId: getAllMenuItems
+      responses:
+        "200":
+          description: Lista de itens de cardápio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MenuItemResponseDTO"
+
+  /api/v1/menu-items/{id}:
+    get:
+      tags: [Menu Items]
+      summary: Obter item de cardápio por ID
+      operationId: getMenuItemById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Item de cardápio encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MenuItemResponseDTO"
+        "404":
+          description: Item de cardápio não encontrado
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+
+    put:
+      tags: [Menu Items]
+      summary: Atualizar item de cardápio
+      operationId: updateMenuItem
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MenuItemRequestDTO"
+      responses:
+        "200":
+          description: Item de cardápio atualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MenuItemResponseDTO"
+        "400":
+          description: Erro de validação
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+        "404":
+          description: Item de cardápio não encontrado
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+
+    delete:
+      tags: [Menu Items]
+      summary: Remover item de cardápio
+      operationId: deleteMenuItem
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Item de cardápio removido
+        "404":
+          description: Item de cardápio não encontrado
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetailExtended"
+
+  /api/v1/menu-items/restaurant/{restaurantId}:
+    get:
+      tags: [Menu Items]
+      summary: Listar itens de cardápio por restaurante
+      operationId: getMenuItemsByRestaurant
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Lista de itens de cardápio por restaurante
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MenuItemResponseDTO"
+
   /actuator/health:
     get:
       tags: [Observabilidade]
@@ -538,6 +1006,181 @@ components:
           format: password
           example: "NovaSenh@456"
       required: [currentPassword, newPassword, confirmPassword]
+
+    UserTypeRequestDTO:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          example: "Dono de Restaurante"
+        description:
+          type: string
+          nullable: true
+          example: "Usuário que possui um restaurante"
+      required: [name]
+
+    UserTypeResponseDTO:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: "Dono de Restaurante"
+        description:
+          type: string
+          nullable: true
+          example: "Usuário que possui um restaurante"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-03-23T10:30:00"
+        lastModifiedAt:
+          type: string
+          format: date-time
+          example: "2026-03-23T10:30:00"
+      required: [id, name, createdAt, lastModifiedAt]
+
+    RestaurantRequestDTO:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          example: "Trattoria Italia"
+        cuisineType:
+          type: string
+          example: "Italiana"
+        openingTime:
+          type: string
+          example: "11:00:00"
+        closingTime:
+          type: string
+          example: "22:00:00"
+        address:
+          $ref: "#/components/schemas/AddressDTO"
+        ownerId:
+          type: integer
+          format: int64
+          example: 1
+      required: [name, cuisineType, openingTime, closingTime, ownerId]
+
+    RestaurantResponseDTO:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: "Trattoria Italia"
+        cuisineType:
+          type: string
+          example: "Italiana"
+        openingTime:
+          type: string
+          example: "11:00:00"
+        closingTime:
+          type: string
+          example: "22:00:00"
+        address:
+          $ref: "#/components/schemas/AddressDTO"
+        ownerId:
+          type: integer
+          format: int64
+          example: 1
+        ownerName:
+          type: string
+          nullable: true
+          example: "João Silva"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-03-23T10:30:00"
+        lastModifiedAt:
+          type: string
+          format: date-time
+          example: "2026-03-23T10:30:00"
+      required: [id, name, cuisineType, openingTime, closingTime, ownerId, createdAt, lastModifiedAt]
+
+    MenuItemRequestDTO:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          example: "Pasta Carbonara"
+        description:
+          type: string
+          nullable: true
+          example: "Massa fresca com molho de ovos, bacon e queijo parmesão"
+        price:
+          type: number
+          format: double
+          minimum: 0
+          example: 45.50
+        availableOnPremises:
+          type: boolean
+          example: true
+        photoPath:
+          type: string
+          nullable: true
+          example: "/images/pasta-carbonara.jpg"
+        restaurantId:
+          type: integer
+          format: int64
+          example: 1
+      required: [name, price, availableOnPremises, restaurantId]
+
+    MenuItemResponseDTO:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: "Pasta Carbonara"
+        description:
+          type: string
+          nullable: true
+          example: "Massa fresca com molho de ovos, bacon e queijo parmesão"
+        price:
+          type: number
+          format: double
+          example: 45.50
+        availableOnPremises:
+          type: boolean
+          example: true
+        photoPath:
+          type: string
+          nullable: true
+          example: "/images/pasta-carbonara.jpg"
+        restaurantId:
+          type: integer
+          format: int64
+          example: 1
+        restaurantName:
+          type: string
+          nullable: true
+          example: "Trattoria Italia"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-03-23T10:30:00"
+        lastModifiedAt:
+          type: string
+          format: date-time
+          example: "2026-03-23T10:30:00"
+      required: [id, name, price, availableOnPremises, restaurantId, createdAt, lastModifiedAt]
 
     ProblemDetailExtended:
       type: object

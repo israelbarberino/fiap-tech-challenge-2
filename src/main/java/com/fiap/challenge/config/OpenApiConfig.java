@@ -17,9 +17,9 @@ public class OpenApiConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("API de Gerenciamento de Usuários")
+                        .title("API de Gerenciamento - Tech Challenge")
                         .version("1.0.0")
-                        .description("API REST para gerenciamento completo de usuários com autenticação e autorização")
+                        .description("API REST para gerenciamento de usuários, tipos de usuário, restaurantes e itens de cardápio")
                         .contact(new Contact()
                                 .name("FIAP Tech Challenge")
                                 .email("support@fiap.com")
