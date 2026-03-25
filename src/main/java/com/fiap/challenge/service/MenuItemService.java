@@ -7,15 +7,14 @@ import com.fiap.challenge.entity.Restaurant;
 import com.fiap.challenge.exception.ResourceNotFoundException;
 import com.fiap.challenge.repository.MenuItemRepository;
 import com.fiap.challenge.repository.RestaurantRepository;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-@Service
 @Transactional
+@Deprecated(forRemoval = false)
 public class MenuItemService {
 
     private static final String MENU_ITEM_NOT_FOUND_MSG = "MenuItem not found with id: ";

@@ -5,7 +5,6 @@ import com.fiap.challenge.dto.UserTypeResponseDTO;
 import com.fiap.challenge.entity.UserType;
 import com.fiap.challenge.exception.ResourceNotFoundException;
 import com.fiap.challenge.repository.UserTypeRepository;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -15,8 +14,8 @@ import java.util.stream.Collectors;
  * Serviço para gerenciar tipos de usuários.
  * Fornece operações CRUD com validação e mapeamento de DTOs.
  */
-@Service
 @Transactional
+@Deprecated(forRemoval = false)
 public class UserTypeService {
 
     private static final String USER_TYPE_NOT_FOUND_ID_MSG = "UserType not found with id: ";

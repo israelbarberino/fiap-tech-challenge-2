@@ -7,7 +7,6 @@ import com.fiap.challenge.entity.User;
 import com.fiap.challenge.exception.ResourceNotFoundException;
 import com.fiap.challenge.repository.RestaurantRepository;
 import com.fiap.challenge.repository.UserRepository;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -17,8 +16,8 @@ import java.util.stream.Collectors;
  * Serviço para gerenciar restaurantes.
  * Fornece operações CRUD com validação e mapeamento de DTOs.
  */
-@Service
 @Transactional
+@Deprecated(forRemoval = false)
 public class RestaurantService {
 
     private static final String RESTAURANT_NOT_FOUND_ID_MSG = "Restaurant not found with id: ";

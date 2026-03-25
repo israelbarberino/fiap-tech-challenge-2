@@ -86,6 +86,12 @@ Controller (entrada HTTP)
 - `menuitem`: implementado com Domain + Application + Infrastructure
 - `user` e `auth`: transição gradual com orchestrators de use case na camada Application
 
+### Estado dos services legados
+
+- `RestaurantService`, `MenuItemService` e `UserTypeService` foram desregistrados do runtime Spring.
+- Esses services permanecem apenas como legado/depreciação para compatibilidade temporária de código e testes.
+- O runtime HTTP agora opera via controllers -> use cases -> ports -> adapters.
+
 ### Novos pacotes
 
 - `domain.usertype.model`: modelo de domínio (`UserTypeAggregate`)
