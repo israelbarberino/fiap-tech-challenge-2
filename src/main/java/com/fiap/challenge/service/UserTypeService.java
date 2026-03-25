@@ -35,7 +35,7 @@ public class UserTypeService {
      * @return DTO com dados do tipo criado
      */
     public UserTypeResponseDTO create(UserTypeRequestDTO requestDTO) {
-        UserType userType = new UserType(requestDTO.getName(), requestDTO.getDescription());
+        UserType userType = new UserType(requestDTO.name(), requestDTO.description());
         UserType savedUserType = userTypeRepository.save(userType);
         return mapToResponseDTO(savedUserType);
     }
@@ -90,8 +90,8 @@ public class UserTypeService {
     public UserTypeResponseDTO update(Long id, UserTypeRequestDTO requestDTO) {
         UserType userType = findUserTypeById(id);
         
-        userType.setName(requestDTO.getName());
-        userType.setDescription(requestDTO.getDescription());
+        userType.setName(requestDTO.name());
+        userType.setDescription(requestDTO.description());
         
         UserType updatedUserType = userTypeRepository.save(userType);
         return mapToResponseDTO(updatedUserType);

@@ -54,8 +54,8 @@ class UserTypeServiceTest {
         UserTypeResponseDTO responseDTO = userTypeService.create(requestDTO);
 
         assertNotNull(responseDTO);
-        assertEquals("Dono de Restaurante", responseDTO.getName());
-        assertEquals("Usuário que possui um restaurante", responseDTO.getDescription());
+        assertEquals("Dono de Restaurante", responseDTO.name());
+        assertEquals("Usuário que possui um restaurante", responseDTO.description());
         verify(userTypeRepository, times(1)).save(any(UserType.class));
     }
 
@@ -67,8 +67,8 @@ class UserTypeServiceTest {
         UserTypeResponseDTO responseDTO = userTypeService.getById(1L);
 
         assertNotNull(responseDTO);
-        assertEquals(1L, responseDTO.getId());
-        assertEquals("Dono de Restaurante", responseDTO.getName());
+        assertEquals(1L, responseDTO.id());
+        assertEquals("Dono de Restaurante", responseDTO.name());
         verify(userTypeRepository, times(1)).findById(1L);
     }
 
@@ -89,7 +89,7 @@ class UserTypeServiceTest {
         UserTypeResponseDTO responseDTO = userTypeService.getByName("Dono de Restaurante");
 
         assertNotNull(responseDTO);
-        assertEquals("Dono de Restaurante", responseDTO.getName());
+        assertEquals("Dono de Restaurante", responseDTO.name());
         verify(userTypeRepository, times(1)).findByName("Dono de Restaurante");
     }
 
@@ -113,7 +113,7 @@ class UserTypeServiceTest {
 
         assertNotNull(responseDTOs);
         assertEquals(1, responseDTOs.size());
-        assertEquals("Dono de Restaurante", responseDTOs.get(0).getName());
+        assertEquals("Dono de Restaurante", responseDTOs.get(0).name());
         verify(userTypeRepository, times(1)).findAll();
     }
 

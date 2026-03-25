@@ -74,8 +74,8 @@ class RestaurantServiceTest {
         RestaurantResponseDTO responseDTO = restaurantService.create(requestDTO);
 
         assertNotNull(responseDTO);
-        assertEquals("Restaurante A", responseDTO.getName());
-        assertEquals("Italiana", responseDTO.getCuisineType());
+        assertEquals("Restaurante A", responseDTO.name());
+        assertEquals("Italiana", responseDTO.cuisineType());
         verify(userRepository, times(1)).findById(1L);
         verify(restaurantRepository, times(1)).save(any(Restaurant.class));
     }
@@ -99,8 +99,8 @@ class RestaurantServiceTest {
         RestaurantResponseDTO responseDTO = restaurantService.getById(1L);
 
         assertNotNull(responseDTO);
-        assertEquals(1L, responseDTO.getId());
-        assertEquals("Restaurante A", responseDTO.getName());
+        assertEquals(1L, responseDTO.id());
+        assertEquals("Restaurante A", responseDTO.name());
         verify(restaurantRepository, times(1)).findById(1L);
     }
 
@@ -121,7 +121,7 @@ class RestaurantServiceTest {
         RestaurantResponseDTO responseDTO = restaurantService.getByName("Restaurante A");
 
         assertNotNull(responseDTO);
-        assertEquals("Restaurante A", responseDTO.getName());
+        assertEquals("Restaurante A", responseDTO.name());
         verify(restaurantRepository, times(1)).findByName("Restaurante A");
     }
 
@@ -136,7 +136,7 @@ class RestaurantServiceTest {
 
         assertNotNull(responseDTOs);
         assertEquals(1, responseDTOs.size());
-        assertEquals("Restaurante A", responseDTOs.get(0).getName());
+        assertEquals("Restaurante A", responseDTOs.get(0).name());
         verify(restaurantRepository, times(1)).findAll();
     }
 
@@ -151,7 +151,7 @@ class RestaurantServiceTest {
 
         assertNotNull(responseDTOs);
         assertEquals(1, responseDTOs.size());
-        assertEquals("Italiana", responseDTOs.get(0).getCuisineType());
+        assertEquals("Italiana", responseDTOs.get(0).cuisineType());
         verify(restaurantRepository, times(1)).findByCuisineType("Italiana");
     }
 

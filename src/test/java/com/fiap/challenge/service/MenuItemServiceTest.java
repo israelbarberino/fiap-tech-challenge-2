@@ -79,8 +79,8 @@ class MenuItemServiceTest {
         MenuItemResponseDTO responseDTO = menuItemService.create(requestDTO);
 
         assertNotNull(responseDTO);
-        assertEquals("Pasta Carbonara", responseDTO.getName());
-        assertEquals(BigDecimal.valueOf(45.50), responseDTO.getPrice());
+        assertEquals("Pasta Carbonara", responseDTO.name());
+        assertEquals(BigDecimal.valueOf(45.50), responseDTO.price());
         verify(restaurantRepository, times(1)).findById(1L);
         verify(menuItemRepository, times(1)).save(any(MenuItem.class));
     }
@@ -104,8 +104,8 @@ class MenuItemServiceTest {
         MenuItemResponseDTO responseDTO = menuItemService.getById(1L);
 
         assertNotNull(responseDTO);
-        assertEquals(1L, responseDTO.getId());
-        assertEquals("Pasta Carbonara", responseDTO.getName());
+        assertEquals(1L, responseDTO.id());
+        assertEquals("Pasta Carbonara", responseDTO.name());
         verify(menuItemRepository, times(1)).findById(1L);
     }
 
@@ -129,7 +129,7 @@ class MenuItemServiceTest {
 
         assertNotNull(responseDTOs);
         assertEquals(1, responseDTOs.size());
-        assertEquals("Pasta Carbonara", responseDTOs.get(0).getName());
+        assertEquals("Pasta Carbonara", responseDTOs.get(0).name());
         verify(menuItemRepository, times(1)).findAll();
     }
 

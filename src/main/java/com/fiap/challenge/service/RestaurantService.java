@@ -41,14 +41,14 @@ public class RestaurantService {
      * @throws ResourceNotFoundException se o proprietário não for encontrado
      */
     public RestaurantResponseDTO create(RestaurantRequestDTO requestDTO) {
-        User owner = findUserById(requestDTO.getOwnerId());
+        User owner = findUserById(requestDTO.ownerId());
 
         Restaurant restaurant = new Restaurant(
-                requestDTO.getName(),
-                requestDTO.getCuisineType(),
-                requestDTO.getOpeningTime(),
-                requestDTO.getClosingTime(),
-                requestDTO.getAddress(),
+                requestDTO.name(),
+                requestDTO.cuisineType(),
+                requestDTO.openingTime(),
+                requestDTO.closingTime(),
+                requestDTO.address(),
                 owner
         );
 
@@ -118,13 +118,13 @@ public class RestaurantService {
      */
     public RestaurantResponseDTO update(Long id, RestaurantRequestDTO requestDTO) {
         Restaurant restaurant = findRestaurantById(id);
-        User owner = findUserById(requestDTO.getOwnerId());
+        User owner = findUserById(requestDTO.ownerId());
 
-        restaurant.setName(requestDTO.getName());
-        restaurant.setCuisineType(requestDTO.getCuisineType());
-        restaurant.setOpeningTime(requestDTO.getOpeningTime());
-        restaurant.setClosingTime(requestDTO.getClosingTime());
-        restaurant.setAddress(requestDTO.getAddress());
+        restaurant.setName(requestDTO.name());
+        restaurant.setCuisineType(requestDTO.cuisineType());
+        restaurant.setOpeningTime(requestDTO.openingTime());
+        restaurant.setClosingTime(requestDTO.closingTime());
+        restaurant.setAddress(requestDTO.address());
         restaurant.setOwner(owner);
 
         Restaurant updatedRestaurant = restaurantRepository.save(restaurant);
