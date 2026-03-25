@@ -1,7 +1,7 @@
 package com.fiap.challenge.controller;
 
+import com.fiap.challenge.application.auth.usecase.ValidateLoginUseCase;
 import com.fiap.challenge.dto.LoginValidateRequest;
-import com.fiap.challenge.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -17,10 +17,11 @@ import java.util.Map;
 @RequestMapping("/api/v1/auth")
 @Tag(name = "Autenticação", description = "Endpoints de autenticação e validação de credenciais")
 public class AuthController {
-    
-    private final UserService userService;
-    public AuthController(UserService userService) {
-        this.userService = userService;
+
+    private final ValidateLoginUseCase validateLoginUseCase;
+
+    public AuthController(ValidateLoginUseCase validateLoginUseCase) {
+        this.validateLoginUseCase = validateLoginUseCase;
     }
 
     @PostMapping("/validate")
@@ -32,7 +33,7 @@ public class AuthController {
     @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos")
     public ResponseEntity<Map<String, String>> validateLogin(
             @Valid @RequestBody LoginValidateRequest request) {
-        userService.validateLogin(request);
+        validateLoginUseCase.execute(request);
         return ResponseEntity.ok(Map.of("message", "Credenciais válidas"));
     }
 }

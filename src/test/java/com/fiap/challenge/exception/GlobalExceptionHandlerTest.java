@@ -28,8 +28,10 @@ class GlobalExceptionHandlerTest {
             new UserNotFoundException("Usuario nao encontrado"), webRequest).getBody();
 
         assertNotNull(detail);
-        assertEquals("USER_NOT_FOUND", detail.getProperties().get("errorCode"));
-        assertEquals(404, detail.getProperties().get("status"));
+        Map<String, Object> properties = detail.getProperties();
+        assertNotNull(properties);
+        assertEquals("USER_NOT_FOUND", properties.get("errorCode"));
+        assertEquals(404, properties.get("status"));
     }
 
     @Test
@@ -39,7 +41,9 @@ class GlobalExceptionHandlerTest {
             new DuplicateEmailException("Email duplicado"), webRequest).getBody();
 
         assertNotNull(detail);
-        assertEquals("DUPLICATE_EMAIL", detail.getProperties().get("errorCode"));
+        Map<String, Object> properties = detail.getProperties();
+        assertNotNull(properties);
+        assertEquals("DUPLICATE_EMAIL", properties.get("errorCode"));
         assertEquals("Email duplicado", detail.getDetail());
     }
 
@@ -50,8 +54,10 @@ class GlobalExceptionHandlerTest {
             new InvalidLoginException("Login invalido"), webRequest).getBody();
 
         assertNotNull(detail);
-        assertEquals("INVALID_CREDENTIALS", detail.getProperties().get("errorCode"));
-        assertEquals(401, detail.getProperties().get("status"));
+        Map<String, Object> properties = detail.getProperties();
+        assertNotNull(properties);
+        assertEquals("INVALID_CREDENTIALS", properties.get("errorCode"));
+        assertEquals(401, properties.get("status"));
     }
 
     @Test
@@ -67,8 +73,11 @@ class GlobalExceptionHandlerTest {
         ProblemDetail detail = handler.handleMethodArgumentNotValidException(ex, webRequest).getBody();
 
         assertNotNull(detail);
-        assertEquals("VALIDATION_FAILED", detail.getProperties().get("errorCode"));
-        Map<String, String> validationErrors = (Map<String, String>) detail.getProperties().get("validationErrors");
+        Map<String, Object> properties = detail.getProperties();
+        assertNotNull(properties);
+        assertEquals("VALIDATION_FAILED", properties.get("errorCode"));
+        Map<String, String> validationErrors = (Map<String, String>) properties.get("validationErrors");
+        assertNotNull(validationErrors);
         assertEquals("email invalido", validationErrors.get("email"));
     }
 
@@ -79,7 +88,9 @@ class GlobalExceptionHandlerTest {
             new IllegalArgumentException("argumento invalido"), webRequest).getBody();
 
         assertNotNull(detail);
-        assertEquals("INVALID_ARGUMENT", detail.getProperties().get("errorCode"));
+        Map<String, Object> properties = detail.getProperties();
+        assertNotNull(properties);
+        assertEquals("INVALID_ARGUMENT", properties.get("errorCode"));
     }
 
     @Test
@@ -88,8 +99,10 @@ class GlobalExceptionHandlerTest {
         ProblemDetail detail = handler.handleGeneralException(new RuntimeException("boom"), webRequest).getBody();
 
         assertNotNull(detail);
-        assertEquals("INTERNAL_SERVER_ERROR", detail.getProperties().get("errorCode"));
-        assertEquals("RuntimeException", detail.getProperties().get("exceptionType"));
+        Map<String, Object> properties = detail.getProperties();
+        assertNotNull(properties);
+        assertEquals("INTERNAL_SERVER_ERROR", properties.get("errorCode"));
+        assertEquals("RuntimeException", properties.get("exceptionType"));
     }
 
     private static class Dummy {
