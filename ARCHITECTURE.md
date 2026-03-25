@@ -88,8 +88,8 @@ Controller (entrada HTTP)
 
 ### Estado dos services legados
 
-- `RestaurantService`, `MenuItemService` e `UserTypeService` foram desregistrados do runtime Spring.
-- Esses services permanecem apenas como legado/depreciação para compatibilidade temporária de código e testes.
+- `RestaurantService`, `MenuItemService` e `UserTypeService` foram removidos definitivamente.
+- Não há mais camada de service legada para esses domínios.
 - O runtime HTTP agora opera via controllers -> use cases -> ports -> adapters.
 
 ### Novos pacotes
