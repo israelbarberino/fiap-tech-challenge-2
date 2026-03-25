@@ -1,6 +1,12 @@
 package com.fiap.challenge.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fiap.challenge.application.user.usecase.ChangePasswordUseCase;
+import com.fiap.challenge.application.user.usecase.CreateUserUseCase;
+import com.fiap.challenge.application.user.usecase.DeleteUserUseCase;
+import com.fiap.challenge.application.user.usecase.GetUserByIdUseCase;
+import com.fiap.challenge.application.user.usecase.GetUsersByNameUseCase;
+import com.fiap.challenge.application.user.usecase.UpdateUserUseCase;
 import com.fiap.challenge.dto.AddressDTO;
 import com.fiap.challenge.dto.ChangePasswordRequest;
 import com.fiap.challenge.dto.UserCreateRequest;
@@ -8,7 +14,6 @@ import com.fiap.challenge.dto.UserResponse;
 import com.fiap.challenge.dto.UserUpdateRequest;
 import com.fiap.challenge.entity.UserRole;
 import com.fiap.challenge.exception.UserNotFoundException;
-import com.fiap.challenge.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,7 +27,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
@@ -47,7 +51,22 @@ class UserControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private UserService userService;
+    private CreateUserUseCase createUserUseCase;
+
+    @MockBean
+    private GetUserByIdUseCase getUserByIdUseCase;
+
+    @MockBean
+    private GetUsersByNameUseCase getUsersByNameUseCase;
+
+    @MockBean
+    private UpdateUserUseCase updateUserUseCase;
+
+    @MockBean
+    private ChangePasswordUseCase changePasswordUseCase;
+
+    @MockBean
+    private DeleteUserUseCase deleteUserUseCase;
 
     private UserResponse userResponse;
     private UserCreateRequest createRequest;
@@ -88,7 +107,7 @@ class UserControllerTest {
     @Test
     @DisplayName("Deve criar usuario e retornar 201")
     void testCreateUser() throws Exception {
-        when(userService.createUser(any(UserCreateRequest.class)))
+        when(createUserUseCase.execute(any(UserCreateRequest.class)))
             .thenReturn(userResponse);
 
         mockMvc.perform(post("/api/v1/users")
@@ -128,7 +147,7 @@ class UserControllerTest {
             addressDTO
         );
 
-        when(userService.updateUser(anyLong(), any(UserUpdateRequest.class)))
+        when(updateUserUseCase.execute(anyLong(), any(UserUpdateRequest.class)))
             .thenReturn(userResponse);
 
         mockMvc.perform(put("/api/v1/users/1")
@@ -148,7 +167,7 @@ class UserControllerTest {
             "novaSenha456"
         );
 
-        doNothing().when(userService).changePassword(anyLong(), any(ChangePasswordRequest.class));
+        doNothing().when(changePasswordUseCase).execute(anyLong(), any(ChangePasswordRequest.class));
 
         mockMvc.perform(patch("/api/v1/users/1/password")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -159,7 +178,7 @@ class UserControllerTest {
     @Test
     @DisplayName("Deve obter usuario por ID e retornar 200")
     void testGetUserById() throws Exception {
-        when(userService.getUserById(1L))
+        when(getUserByIdUseCase.execute(1L))
             .thenReturn(userResponse);
 
         mockMvc.perform(get("/api/v1/users/1")
@@ -172,7 +191,7 @@ class UserControllerTest {
     @Test
     @DisplayName("Deve retornar 404 ao obter usuario inexistente")
     void testGetUserByIdNotFound() throws Exception {
-        when(userService.getUserById(999L))
+        when(getUserByIdUseCase.execute(999L))
             .thenThrow(new UserNotFoundException("Usuario nao encontrado"));
 
         mockMvc.perform(get("/api/v1/users/999")
@@ -184,7 +203,7 @@ class UserControllerTest {
     @Test
     @DisplayName("Deve buscar usuarios por nome e retornar 200")
     void testGetUsersByName() throws Exception {
-        when(userService.getUsersByName("Joao"))
+        when(getUsersByNameUseCase.execute("Joao"))
             .thenReturn(List.of(userResponse));
 
         mockMvc.perform(get("/api/v1/users?name=Joao")
@@ -197,7 +216,7 @@ class UserControllerTest {
     @Test
     @DisplayName("Deve deletar usuario e retornar 204")
     void testDeleteUser() throws Exception {
-        doNothing().when(userService).deleteUser(1L);
+        doNothing().when(deleteUserUseCase).execute(1L);
 
         mockMvc.perform(delete("/api/v1/users/1")
                 .contentType(MediaType.APPLICATION_JSON))

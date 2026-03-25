@@ -1,7 +1,12 @@
 package com.fiap.challenge.controller;
 
+import com.fiap.challenge.application.user.usecase.ChangePasswordUseCase;
+import com.fiap.challenge.application.user.usecase.CreateUserUseCase;
+import com.fiap.challenge.application.user.usecase.DeleteUserUseCase;
+import com.fiap.challenge.application.user.usecase.GetUserByIdUseCase;
+import com.fiap.challenge.application.user.usecase.GetUsersByNameUseCase;
+import com.fiap.challenge.application.user.usecase.UpdateUserUseCase;
 import com.fiap.challenge.dto.*;
-import com.fiap.challenge.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,10 +24,27 @@ import java.util.List;
 @RequestMapping("/api/v1/users")
 @Tag(name = "Usuários", description = "Endpoints para gerenciamento de usuários")
 public class UserController {
-    
-    private final UserService userService;
-    public UserController(UserService userService) {
-        this.userService = userService;
+
+    private final CreateUserUseCase createUserUseCase;
+    private final GetUserByIdUseCase getUserByIdUseCase;
+    private final GetUsersByNameUseCase getUsersByNameUseCase;
+    private final UpdateUserUseCase updateUserUseCase;
+    private final ChangePasswordUseCase changePasswordUseCase;
+    private final DeleteUserUseCase deleteUserUseCase;
+
+    public UserController(
+            CreateUserUseCase createUserUseCase,
+            GetUserByIdUseCase getUserByIdUseCase,
+            GetUsersByNameUseCase getUsersByNameUseCase,
+            UpdateUserUseCase updateUserUseCase,
+            ChangePasswordUseCase changePasswordUseCase,
+            DeleteUserUseCase deleteUserUseCase) {
+        this.createUserUseCase = createUserUseCase;
+        this.getUserByIdUseCase = getUserByIdUseCase;
+        this.getUsersByNameUseCase = getUsersByNameUseCase;
+        this.updateUserUseCase = updateUserUseCase;
+        this.changePasswordUseCase = changePasswordUseCase;
+        this.deleteUserUseCase = deleteUserUseCase;
     }
 
     @PostMapping
@@ -33,7 +55,7 @@ public class UserController {
     @ApiResponse(responseCode = "409", description = "Email ou login já registrado")
     @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos")
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserCreateRequest request) {
-        UserResponse response = userService.createUser(request);
+        UserResponse response = createUserUseCase.execute(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -45,7 +67,7 @@ public class UserController {
     @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
     public ResponseEntity<UserResponse> getUserById(
             @Parameter(description = "ID do usuário") @PathVariable Long id) {
-        UserResponse response = userService.getUserById(id);
+        UserResponse response = getUserByIdUseCase.execute(id);
         return ResponseEntity.ok(response);
     }
 
@@ -55,7 +77,7 @@ public class UserController {
     @Content(mediaType = "application/json", schema = @Schema(implementation = List.class)))
     public ResponseEntity<List<UserResponse>> getUsersByName(
             @Parameter(description = "Nome para buscar") @RequestParam String name) {
-        List<UserResponse> response = userService.getUsersByName(name);
+        List<UserResponse> response = getUsersByNameUseCase.execute(name);
         return ResponseEntity.ok(response);
     }
 
@@ -70,7 +92,7 @@ public class UserController {
     public ResponseEntity<UserResponse> updateUser(
             @Parameter(description = "ID do usuário") @PathVariable Long id,
             @Valid @RequestBody UserUpdateRequest request) {
-        UserResponse response = userService.updateUser(id, request);
+        UserResponse response = updateUserUseCase.execute(id, request);
         return ResponseEntity.ok(response);
     }
 
@@ -83,7 +105,7 @@ public class UserController {
     public ResponseEntity<Void> changePassword(
             @Parameter(description = "ID do usuário") @PathVariable Long id,
             @Valid @RequestBody ChangePasswordRequest request) {
-        userService.changePassword(id, request);
+        changePasswordUseCase.execute(id, request);
         return ResponseEntity.noContent().build();
     }
 
@@ -93,7 +115,7 @@ public class UserController {
     @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
     public ResponseEntity<Void> deleteUser(
             @Parameter(description = "ID do usuário") @PathVariable Long id) {
-        userService.deleteUser(id);
+        deleteUserUseCase.execute(id);
         return ResponseEntity.noContent().build();
     }
 }

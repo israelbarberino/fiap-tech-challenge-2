@@ -65,6 +65,52 @@ Sistema de **gerenciamento de usuários para restaurantes** implementado com **S
 
 ---
 
+## 🔄 Evolução Arquitetural: Clean Architecture + DDD
+
+Foi aplicada uma evolução incremental para reduzir acoplamento entre regras de negócio e detalhes de persistência.
+
+### Estrutura aplicada
+
+```
+Controller (entrada HTTP)
+  -> Application Use Cases (orquestração de regras)
+    -> Domain Port (contrato de saída)
+      -> Infrastructure Adapter JPA (implementação técnica)
+        -> Spring Data Repository
+```
+
+### Bounded Contexts aplicados
+
+- `usertype`: implementado com Domain + Application + Infrastructure
+- `restaurant`: implementado com Domain + Application + Infrastructure
+- `menuitem`: implementado com Domain + Application + Infrastructure
+- `user` e `auth`: transição gradual com orchestrators de use case na camada Application
+
+### Novos pacotes
+
+- `domain.usertype.model`: modelo de domínio (`UserTypeAggregate`)
+- `domain.usertype.port`: porta de saída (`UserTypeGateway`)
+- `application.usertype.usecase`: casos de uso explícitos
+- `application.usertype.dto`: comandos e resultado de aplicação
+- `infrastructure.persistence.usertype`: adapter JPA (`UserTypeJpaGateway`)
+
+### Decisão arquitetural: DTO vs Model
+
+- `DTO`: usado nas bordas do sistema (HTTP request/response) para contrato de API e validação.
+- `Model de domínio (Aggregate)`: usado no núcleo da aplicação para representar regra de negócio e estado.
+- `Implementação adotada`: controllers continuam recebendo/retornando DTOs, e use cases operam com modelos internos + mapeadores.
+
+Essa separação evita vazamento de detalhes de persistência/API para o domínio e melhora testabilidade e evolução independente das camadas.
+
+### Ganhos obtidos
+
+- Casos de uso isolados e testáveis sem dependência direta de JPA.
+- Regra de negócio dependente de abstração (`UserTypeGateway`), não de framework.
+- Controller desacoplado do service legado e orientado a caso de uso.
+- Base pronta para expandir o mesmo padrão para `Restaurant`, `MenuItem` e `User`.
+
+---
+
 ## 📁 Estrutura de Pastas
 
 ```

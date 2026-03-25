@@ -1,9 +1,9 @@
 package com.fiap.challenge.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fiap.challenge.application.auth.usecase.ValidateLoginUseCase;
 import com.fiap.challenge.dto.LoginValidateRequest;
 import com.fiap.challenge.exception.InvalidLoginException;
-import com.fiap.challenge.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,13 +32,13 @@ class AuthControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private UserService userService;
+    private ValidateLoginUseCase validateLoginUseCase;
 
     @Test
     @DisplayName("Deve validar login com sucesso e retornar 200")
     void testValidateLoginSuccess() throws Exception {
         LoginValidateRequest request = new LoginValidateRequest("joao.silva", "senha123");
-        doNothing().when(userService).validateLogin(any(LoginValidateRequest.class));
+        doNothing().when(validateLoginUseCase).execute(any(LoginValidateRequest.class));
 
         mockMvc.perform(post("/api/v1/auth/validate")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -52,7 +52,7 @@ class AuthControllerTest {
     void testValidateLoginInvalid() throws Exception {
         LoginValidateRequest request = new LoginValidateRequest("inexistente", "senhaErrada");
         doThrow(new InvalidLoginException("Login ou senha inválidos"))
-            .when(userService).validateLogin(any(LoginValidateRequest.class));
+            .when(validateLoginUseCase).execute(any(LoginValidateRequest.class));
 
         mockMvc.perform(post("/api/v1/auth/validate")
                 .contentType(MediaType.APPLICATION_JSON)

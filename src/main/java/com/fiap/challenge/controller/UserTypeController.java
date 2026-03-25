@@ -1,8 +1,16 @@
 package com.fiap.challenge.controller;
 
+import com.fiap.challenge.application.usertype.dto.CreateUserTypeCommand;
+import com.fiap.challenge.application.usertype.dto.UpdateUserTypeCommand;
+import com.fiap.challenge.application.usertype.dto.UserTypeResult;
+import com.fiap.challenge.application.usertype.usecase.CreateUserTypeUseCase;
+import com.fiap.challenge.application.usertype.usecase.DeleteUserTypeUseCase;
+import com.fiap.challenge.application.usertype.usecase.GetAllUserTypesUseCase;
+import com.fiap.challenge.application.usertype.usecase.GetUserTypeByIdUseCase;
+import com.fiap.challenge.application.usertype.usecase.GetUserTypeByNameUseCase;
+import com.fiap.challenge.application.usertype.usecase.UpdateUserTypeUseCase;
 import com.fiap.challenge.dto.UserTypeRequestDTO;
 import com.fiap.challenge.dto.UserTypeResponseDTO;
-import com.fiap.challenge.service.UserTypeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -21,10 +29,26 @@ import java.util.List;
 @Tag(name = "User Types", description = "Endpoints para gerenciar tipos de usuários")
 public class UserTypeController {
 
-    private final UserTypeService userTypeService;
+    private final CreateUserTypeUseCase createUserTypeUseCase;
+    private final GetUserTypeByIdUseCase getUserTypeByIdUseCase;
+    private final GetUserTypeByNameUseCase getUserTypeByNameUseCase;
+    private final GetAllUserTypesUseCase getAllUserTypesUseCase;
+    private final UpdateUserTypeUseCase updateUserTypeUseCase;
+    private final DeleteUserTypeUseCase deleteUserTypeUseCase;
 
-    public UserTypeController(UserTypeService userTypeService) {
-        this.userTypeService = userTypeService;
+    public UserTypeController(
+            CreateUserTypeUseCase createUserTypeUseCase,
+            GetUserTypeByIdUseCase getUserTypeByIdUseCase,
+            GetUserTypeByNameUseCase getUserTypeByNameUseCase,
+            GetAllUserTypesUseCase getAllUserTypesUseCase,
+            UpdateUserTypeUseCase updateUserTypeUseCase,
+            DeleteUserTypeUseCase deleteUserTypeUseCase) {
+        this.createUserTypeUseCase = createUserTypeUseCase;
+        this.getUserTypeByIdUseCase = getUserTypeByIdUseCase;
+        this.getUserTypeByNameUseCase = getUserTypeByNameUseCase;
+        this.getAllUserTypesUseCase = getAllUserTypesUseCase;
+        this.updateUserTypeUseCase = updateUserTypeUseCase;
+        this.deleteUserTypeUseCase = deleteUserTypeUseCase;
     }
 
     /**
@@ -34,7 +58,10 @@ public class UserTypeController {
     @PostMapping
     @Operation(summary = "Criar novo tipo de usuário")
     public ResponseEntity<UserTypeResponseDTO> create(@Valid @RequestBody UserTypeRequestDTO requestDTO) {
-        UserTypeResponseDTO responseDTO = userTypeService.create(requestDTO);
+        UserTypeResult result = createUserTypeUseCase.execute(
+                new CreateUserTypeCommand(requestDTO.name(), requestDTO.description())
+        );
+        UserTypeResponseDTO responseDTO = toResponseDTO(result);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 
@@ -45,7 +72,7 @@ public class UserTypeController {
     @GetMapping("/{id}")
     @Operation(summary = "Buscar tipo de usuário por ID")
     public ResponseEntity<UserTypeResponseDTO> getById(@PathVariable Long id) {
-        UserTypeResponseDTO responseDTO = userTypeService.getById(id);
+        UserTypeResponseDTO responseDTO = toResponseDTO(getUserTypeByIdUseCase.execute(id));
         return ResponseEntity.ok(responseDTO);
     }
 
@@ -56,7 +83,7 @@ public class UserTypeController {
     @GetMapping("/name/{name}")
     @Operation(summary = "Buscar tipo de usuário por nome")
     public ResponseEntity<UserTypeResponseDTO> getByName(@PathVariable String name) {
-        UserTypeResponseDTO responseDTO = userTypeService.getByName(name);
+        UserTypeResponseDTO responseDTO = toResponseDTO(getUserTypeByNameUseCase.execute(name));
         return ResponseEntity.ok(responseDTO);
     }
 
@@ -67,7 +94,9 @@ public class UserTypeController {
     @GetMapping
     @Operation(summary = "Listar todos os tipos de usuários")
     public ResponseEntity<List<UserTypeResponseDTO>> getAll() {
-        List<UserTypeResponseDTO> responseDTOs = userTypeService.getAll();
+        List<UserTypeResponseDTO> responseDTOs = getAllUserTypesUseCase.execute().stream()
+                .map(this::toResponseDTO)
+                .toList();
         return ResponseEntity.ok(responseDTOs);
     }
 
@@ -80,7 +109,11 @@ public class UserTypeController {
     public ResponseEntity<UserTypeResponseDTO> update(
             @PathVariable Long id,
             @Valid @RequestBody UserTypeRequestDTO requestDTO) {
-        UserTypeResponseDTO responseDTO = userTypeService.update(id, requestDTO);
+        UserTypeResult result = updateUserTypeUseCase.execute(
+            id,
+            new UpdateUserTypeCommand(requestDTO.name(), requestDTO.description())
+        );
+        UserTypeResponseDTO responseDTO = toResponseDTO(result);
         return ResponseEntity.ok(responseDTO);
     }
 
@@ -91,7 +124,17 @@ public class UserTypeController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Deletar tipo de usuário")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        userTypeService.delete(id);
+        deleteUserTypeUseCase.execute(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private UserTypeResponseDTO toResponseDTO(UserTypeResult result) {
+        return new UserTypeResponseDTO(
+                result.id(),
+                result.name(),
+                result.description(),
+                result.createdAt(),
+                result.lastModifiedAt()
+        );
     }
 }

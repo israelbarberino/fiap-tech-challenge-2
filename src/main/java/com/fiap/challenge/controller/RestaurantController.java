@@ -1,8 +1,17 @@
 package com.fiap.challenge.controller;
 
+import com.fiap.challenge.application.restaurant.dto.CreateRestaurantCommand;
+import com.fiap.challenge.application.restaurant.dto.RestaurantResult;
+import com.fiap.challenge.application.restaurant.dto.UpdateRestaurantCommand;
+import com.fiap.challenge.application.restaurant.usecase.CreateRestaurantUseCase;
+import com.fiap.challenge.application.restaurant.usecase.DeleteRestaurantUseCase;
+import com.fiap.challenge.application.restaurant.usecase.GetAllRestaurantsUseCase;
+import com.fiap.challenge.application.restaurant.usecase.GetRestaurantByIdUseCase;
+import com.fiap.challenge.application.restaurant.usecase.GetRestaurantByNameUseCase;
+import com.fiap.challenge.application.restaurant.usecase.GetRestaurantsByCuisineTypeUseCase;
+import com.fiap.challenge.application.restaurant.usecase.UpdateRestaurantUseCase;
 import com.fiap.challenge.dto.RestaurantRequestDTO;
 import com.fiap.challenge.dto.RestaurantResponseDTO;
-import com.fiap.challenge.service.RestaurantService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -21,10 +30,29 @@ import java.util.List;
 @Tag(name = "Restaurants", description = "Endpoints para gerenciar restaurantes")
 public class RestaurantController {
 
-    private final RestaurantService restaurantService;
+    private final CreateRestaurantUseCase createRestaurantUseCase;
+    private final GetRestaurantByIdUseCase getRestaurantByIdUseCase;
+    private final GetRestaurantByNameUseCase getRestaurantByNameUseCase;
+    private final GetAllRestaurantsUseCase getAllRestaurantsUseCase;
+    private final GetRestaurantsByCuisineTypeUseCase getRestaurantsByCuisineTypeUseCase;
+    private final UpdateRestaurantUseCase updateRestaurantUseCase;
+    private final DeleteRestaurantUseCase deleteRestaurantUseCase;
 
-    public RestaurantController(RestaurantService restaurantService) {
-        this.restaurantService = restaurantService;
+    public RestaurantController(
+            CreateRestaurantUseCase createRestaurantUseCase,
+            GetRestaurantByIdUseCase getRestaurantByIdUseCase,
+            GetRestaurantByNameUseCase getRestaurantByNameUseCase,
+            GetAllRestaurantsUseCase getAllRestaurantsUseCase,
+            GetRestaurantsByCuisineTypeUseCase getRestaurantsByCuisineTypeUseCase,
+            UpdateRestaurantUseCase updateRestaurantUseCase,
+            DeleteRestaurantUseCase deleteRestaurantUseCase) {
+        this.createRestaurantUseCase = createRestaurantUseCase;
+        this.getRestaurantByIdUseCase = getRestaurantByIdUseCase;
+        this.getRestaurantByNameUseCase = getRestaurantByNameUseCase;
+        this.getAllRestaurantsUseCase = getAllRestaurantsUseCase;
+        this.getRestaurantsByCuisineTypeUseCase = getRestaurantsByCuisineTypeUseCase;
+        this.updateRestaurantUseCase = updateRestaurantUseCase;
+        this.deleteRestaurantUseCase = deleteRestaurantUseCase;
     }
 
     /**
@@ -34,7 +62,15 @@ public class RestaurantController {
     @PostMapping
     @Operation(summary = "Criar novo restaurante")
     public ResponseEntity<RestaurantResponseDTO> create(@Valid @RequestBody RestaurantRequestDTO requestDTO) {
-        RestaurantResponseDTO responseDTO = restaurantService.create(requestDTO);
+        RestaurantResult result = createRestaurantUseCase.execute(new CreateRestaurantCommand(
+                requestDTO.name(),
+                requestDTO.cuisineType(),
+                requestDTO.openingTime(),
+                requestDTO.closingTime(),
+                requestDTO.address(),
+                requestDTO.ownerId()
+        ));
+        RestaurantResponseDTO responseDTO = toResponseDTO(result);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 
@@ -45,7 +81,7 @@ public class RestaurantController {
     @GetMapping("/{id}")
     @Operation(summary = "Buscar restaurante por ID")
     public ResponseEntity<RestaurantResponseDTO> getById(@PathVariable Long id) {
-        RestaurantResponseDTO responseDTO = restaurantService.getById(id);
+        RestaurantResponseDTO responseDTO = toResponseDTO(getRestaurantByIdUseCase.execute(id));
         return ResponseEntity.ok(responseDTO);
     }
 
@@ -56,7 +92,7 @@ public class RestaurantController {
     @GetMapping("/name/{name}")
     @Operation(summary = "Buscar restaurante por nome")
     public ResponseEntity<RestaurantResponseDTO> getByName(@PathVariable String name) {
-        RestaurantResponseDTO responseDTO = restaurantService.getByName(name);
+        RestaurantResponseDTO responseDTO = toResponseDTO(getRestaurantByNameUseCase.execute(name));
         return ResponseEntity.ok(responseDTO);
     }
 
@@ -67,7 +103,9 @@ public class RestaurantController {
     @GetMapping
     @Operation(summary = "Listar todos os restaurantes")
     public ResponseEntity<List<RestaurantResponseDTO>> getAll() {
-        List<RestaurantResponseDTO> responseDTOs = restaurantService.getAll();
+        List<RestaurantResponseDTO> responseDTOs = getAllRestaurantsUseCase.execute().stream()
+                .map(this::toResponseDTO)
+                .toList();
         return ResponseEntity.ok(responseDTOs);
     }
 
@@ -78,7 +116,9 @@ public class RestaurantController {
     @GetMapping("/cuisine/{cuisineType}")
     @Operation(summary = "Listar restaurantes por tipo de cozinha")
     public ResponseEntity<List<RestaurantResponseDTO>> getByCuisineType(@PathVariable String cuisineType) {
-        List<RestaurantResponseDTO> responseDTOs = restaurantService.getByCuisineType(cuisineType);
+        List<RestaurantResponseDTO> responseDTOs = getRestaurantsByCuisineTypeUseCase.execute(cuisineType).stream()
+                .map(this::toResponseDTO)
+                .toList();
         return ResponseEntity.ok(responseDTOs);
     }
 
@@ -91,7 +131,15 @@ public class RestaurantController {
     public ResponseEntity<RestaurantResponseDTO> update(
             @PathVariable Long id,
             @Valid @RequestBody RestaurantRequestDTO requestDTO) {
-        RestaurantResponseDTO responseDTO = restaurantService.update(id, requestDTO);
+        RestaurantResult result = updateRestaurantUseCase.execute(id, new UpdateRestaurantCommand(
+            requestDTO.name(),
+            requestDTO.cuisineType(),
+            requestDTO.openingTime(),
+            requestDTO.closingTime(),
+            requestDTO.address(),
+            requestDTO.ownerId()
+        ));
+        RestaurantResponseDTO responseDTO = toResponseDTO(result);
         return ResponseEntity.ok(responseDTO);
     }
 
@@ -102,7 +150,22 @@ public class RestaurantController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Deletar restaurante")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        restaurantService.delete(id);
+        deleteRestaurantUseCase.execute(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private RestaurantResponseDTO toResponseDTO(RestaurantResult result) {
+        return new RestaurantResponseDTO(
+                result.id(),
+                result.name(),
+                result.cuisineType(),
+                result.openingTime(),
+                result.closingTime(),
+                result.address(),
+                result.ownerId(),
+                result.ownerName(),
+                result.createdAt(),
+                result.lastModifiedAt()
+        );
     }
 }

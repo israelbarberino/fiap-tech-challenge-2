@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -82,17 +83,17 @@ public class MenuItemService {
     }
 
     public void delete(Long id) {
-        MenuItem menuItem = findMenuItemById(id);
+        MenuItem menuItem = findMenuItemById(Objects.requireNonNull(id, "id is required"));
         menuItemRepository.delete(menuItem);
     }
 
     private MenuItem findMenuItemById(Long id) {
-        return menuItemRepository.findById(id)
+        return menuItemRepository.findById(Objects.requireNonNull(id, "id is required"))
                 .orElseThrow(() -> new ResourceNotFoundException(MENU_ITEM_NOT_FOUND_MSG + id));
     }
 
     private Restaurant findRestaurantById(Long restaurantId) {
-        return restaurantRepository.findById(restaurantId)
+        return restaurantRepository.findById(Objects.requireNonNull(restaurantId, "restaurantId is required"))
                 .orElseThrow(() -> new ResourceNotFoundException(RESTAURANT_NOT_FOUND_MSG + restaurantId));
     }
 

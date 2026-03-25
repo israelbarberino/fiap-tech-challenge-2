@@ -1,8 +1,16 @@
 package com.fiap.challenge.controller;
 
+import com.fiap.challenge.application.menuitem.dto.CreateMenuItemCommand;
+import com.fiap.challenge.application.menuitem.dto.MenuItemResult;
+import com.fiap.challenge.application.menuitem.dto.UpdateMenuItemCommand;
+import com.fiap.challenge.application.menuitem.usecase.CreateMenuItemUseCase;
+import com.fiap.challenge.application.menuitem.usecase.DeleteMenuItemUseCase;
+import com.fiap.challenge.application.menuitem.usecase.GetAllMenuItemsUseCase;
+import com.fiap.challenge.application.menuitem.usecase.GetMenuItemByIdUseCase;
+import com.fiap.challenge.application.menuitem.usecase.GetMenuItemsByRestaurantUseCase;
+import com.fiap.challenge.application.menuitem.usecase.UpdateMenuItemUseCase;
 import com.fiap.challenge.dto.MenuItemRequestDTO;
 import com.fiap.challenge.dto.MenuItemResponseDTO;
-import com.fiap.challenge.service.MenuItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -21,10 +29,26 @@ import java.util.List;
 @Tag(name = "Menu Items", description = "Endpoints para gerenciar itens do cardápio")
 public class MenuItemController {
 
-    private final MenuItemService menuItemService;
+    private final CreateMenuItemUseCase createMenuItemUseCase;
+    private final GetMenuItemByIdUseCase getMenuItemByIdUseCase;
+    private final GetAllMenuItemsUseCase getAllMenuItemsUseCase;
+    private final GetMenuItemsByRestaurantUseCase getMenuItemsByRestaurantUseCase;
+    private final UpdateMenuItemUseCase updateMenuItemUseCase;
+    private final DeleteMenuItemUseCase deleteMenuItemUseCase;
 
-    public MenuItemController(MenuItemService menuItemService) {
-        this.menuItemService = menuItemService;
+    public MenuItemController(
+            CreateMenuItemUseCase createMenuItemUseCase,
+            GetMenuItemByIdUseCase getMenuItemByIdUseCase,
+            GetAllMenuItemsUseCase getAllMenuItemsUseCase,
+            GetMenuItemsByRestaurantUseCase getMenuItemsByRestaurantUseCase,
+            UpdateMenuItemUseCase updateMenuItemUseCase,
+            DeleteMenuItemUseCase deleteMenuItemUseCase) {
+        this.createMenuItemUseCase = createMenuItemUseCase;
+        this.getMenuItemByIdUseCase = getMenuItemByIdUseCase;
+        this.getAllMenuItemsUseCase = getAllMenuItemsUseCase;
+        this.getMenuItemsByRestaurantUseCase = getMenuItemsByRestaurantUseCase;
+        this.updateMenuItemUseCase = updateMenuItemUseCase;
+        this.deleteMenuItemUseCase = deleteMenuItemUseCase;
     }
 
     /**
@@ -34,7 +58,15 @@ public class MenuItemController {
     @PostMapping
     @Operation(summary = "Criar novo item de cardápio")
     public ResponseEntity<MenuItemResponseDTO> create(@Valid @RequestBody MenuItemRequestDTO requestDTO) {
-        MenuItemResponseDTO responseDTO = menuItemService.create(requestDTO);
+        MenuItemResult result = createMenuItemUseCase.execute(new CreateMenuItemCommand(
+                requestDTO.name(),
+                requestDTO.description(),
+                requestDTO.price(),
+                requestDTO.availableOnPremises(),
+                requestDTO.photoPath(),
+                requestDTO.restaurantId()
+        ));
+        MenuItemResponseDTO responseDTO = toResponseDTO(result);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 
@@ -45,7 +77,7 @@ public class MenuItemController {
     @GetMapping("/{id}")
     @Operation(summary = "Buscar item de cardápio por ID")
     public ResponseEntity<MenuItemResponseDTO> getById(@PathVariable Long id) {
-        MenuItemResponseDTO responseDTO = menuItemService.getById(id);
+        MenuItemResponseDTO responseDTO = toResponseDTO(getMenuItemByIdUseCase.execute(id));
         return ResponseEntity.ok(responseDTO);
     }
 
@@ -56,7 +88,9 @@ public class MenuItemController {
     @GetMapping
     @Operation(summary = "Listar todos os itens de cardápio")
     public ResponseEntity<List<MenuItemResponseDTO>> getAll() {
-        List<MenuItemResponseDTO> responseDTOs = menuItemService.getAll();
+        List<MenuItemResponseDTO> responseDTOs = getAllMenuItemsUseCase.execute().stream()
+                .map(this::toResponseDTO)
+                .toList();
         return ResponseEntity.ok(responseDTOs);
     }
 
@@ -67,7 +101,9 @@ public class MenuItemController {
     @GetMapping("/restaurant/{restaurantId}")
     @Operation(summary = "Listar itens de cardápio de um restaurante")
     public ResponseEntity<List<MenuItemResponseDTO>> getByRestaurantId(@PathVariable Long restaurantId) {
-        List<MenuItemResponseDTO> responseDTOs = menuItemService.getByRestaurantId(restaurantId);
+        List<MenuItemResponseDTO> responseDTOs = getMenuItemsByRestaurantUseCase.execute(restaurantId).stream()
+                .map(this::toResponseDTO)
+                .toList();
         return ResponseEntity.ok(responseDTOs);
     }
 
@@ -80,7 +116,15 @@ public class MenuItemController {
     public ResponseEntity<MenuItemResponseDTO> update(
             @PathVariable Long id,
             @Valid @RequestBody MenuItemRequestDTO requestDTO) {
-        MenuItemResponseDTO responseDTO = menuItemService.update(id, requestDTO);
+        MenuItemResult result = updateMenuItemUseCase.execute(id, new UpdateMenuItemCommand(
+            requestDTO.name(),
+            requestDTO.description(),
+            requestDTO.price(),
+            requestDTO.availableOnPremises(),
+            requestDTO.photoPath(),
+            requestDTO.restaurantId()
+        ));
+        MenuItemResponseDTO responseDTO = toResponseDTO(result);
         return ResponseEntity.ok(responseDTO);
     }
 
@@ -91,7 +135,22 @@ public class MenuItemController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Deletar item de cardápio")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        menuItemService.delete(id);
+        deleteMenuItemUseCase.execute(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private MenuItemResponseDTO toResponseDTO(MenuItemResult result) {
+        return new MenuItemResponseDTO(
+                result.id(),
+                result.name(),
+                result.description(),
+                result.price(),
+                result.availableOnPremises(),
+                result.photoPath(),
+                result.restaurantId(),
+                result.restaurantName(),
+                result.createdAt(),
+                result.lastModifiedAt()
+        );
     }
 }
